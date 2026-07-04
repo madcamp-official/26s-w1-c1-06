@@ -8,13 +8,25 @@
 
 export type FriendshipStatus = "pending" | "accepted";
 
-export type InviteStatus = "pending" | "accepted" | "rejected" | "auto_declined";
+/** schema.sql invite_status ENUM (생성자는 'accepted'로 삽입). */
+export type InviteStatus = "invited" | "accepted" | "declined" | "auto_declined";
 
 export type Verdict = "on_time" | "late" | "no_show";
 
 export type PositionDirection = "buy" | "short";
 
-export type PositionStatus = "open" | "settled";
+/** 'cancelled' = S-08(2차). */
+export type PositionStatus = "open" | "settled" | "cancelled";
+
+/** schema.sql tx_type ENUM (포인트 원장). */
+export type TxType =
+  | "signup_grant"
+  | "position_lock"
+  | "position_unlock"
+  | "position_payout"
+  | "defense_reward"
+  | "self_stock_buy"
+  | "self_stock_sell";
 
 /** 위경도 좌표 (도 단위). */
 export interface LatLng {

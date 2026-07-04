@@ -30,8 +30,8 @@ describe("isBettable (M0-5 가드 a)", () => {
   });
 
   it("수락 참여자가 아니면 불가 (F-19)", () => {
-    expect(isBettable(ctx({ targetInviteStatus: "pending" }), now)).toBe(false);
-    expect(isBettable(ctx({ targetInviteStatus: "rejected" }), now)).toBe(false);
+    expect(isBettable(ctx({ targetInviteStatus: "invited" }), now)).toBe(false);
+    expect(isBettable(ctx({ targetInviteStatus: "declined" }), now)).toBe(false);
     expect(isBettable(ctx({ targetInviteStatus: "auto_declined" }), now)).toBe(
       false,
     );
