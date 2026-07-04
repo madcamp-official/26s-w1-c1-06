@@ -1,0 +1,23 @@
+# Latestock API systemd 서비스 (M0-6 / M5-1)
+# 배치 위치: /etc/systemd/system/latestock-api.service
+#
+# 정산 스케줄러가 이 상시 프로세스 안에서 1분 주기로 돈다(D-B: Express 상시 프로세스).
+# 서버 재기동 시 자동 복구(미정산 약속이 폴링 조건에 남음, F-12).
+
+[Unit]
+Description=Latestock API (Express + settlement scheduler)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/latestock/apps/api
+EnvironmentFile=/opt/latestock/apps/api/.env
+ExecStart=/usr/bin/node dist/index.js
+Restart=always
+RestartSec=3
+StandardOutput=append:/var/log/latestock-api.log
+StandardError=append:/var/log/latestock-api.log
+
+[Install]
+WantedBy=multi-user.target
