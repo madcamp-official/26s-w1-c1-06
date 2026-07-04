@@ -1,0 +1,20 @@
+{
+  "name": "latestock",
+  "version": "0.1.0",
+  "private": true,
+  "description": "지각비 주식 시장 — 친구의 시간 약속 준수를 가상 주식으로 표현하는 소셜 게임형 웹 서비스",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev:api": "npm run dev --workspace @latestock/api",
+    "dev:web": "npm run dev --workspace @latestock/web",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
