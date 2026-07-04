@@ -9,9 +9,13 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "predev:api": "npm run build --workspace @latestock/shared",
     "dev:api": "npm run dev --workspace @latestock/api",
+    "predev:web": "npm run build --workspace @latestock/shared",
     "dev:web": "npm run dev --workspace @latestock/web",
+    "pretest": "npm run build --workspace @latestock/shared",
     "test": "npm run test --workspaces --if-present",
+    "pretypecheck": "npm run build --workspace @latestock/shared",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "engines": {
