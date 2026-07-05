@@ -16,7 +16,8 @@
     "pretest": "npm run build --workspace @latestock/shared",
     "test": "npm run test --workspaces --if-present",
     "pretypecheck": "npm run build --workspace @latestock/shared",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:apply-schema": "npm run db:apply-schema --workspace @latestock/api"
   },
   "engines": {
     "node": ">=20"

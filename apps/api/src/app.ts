@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import { env } from "./env.js";
 import { requireAuth } from "./auth/middleware.js";
+import { checkDbHealth } from "./db/health.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -12,6 +13,14 @@ export function createApp(): express.Express {
   // 배포 도달성 확인용 (구현계획 M0-6).
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", service: "latestock-api", ts: Date.now() });
+  });
+
+  // Neon 등 DB 연결·쿼리 검증용.
+  app.get("/api/db/health", async (_req, res) => {
+    const db = await checkDbHealth();
+    const httpStatus =
+      db.status === "ok" ? 200 : db.status === "not_configured" ? 503 : 500;
+    res.status(httpStatus).json(db);
   });
 
   // 보호 라우트 동작 확인용 데모 엔드포인트 (M0-4 검증).
