@@ -8,11 +8,22 @@ function required(name: string, fallback?: string): string {
   return value;
 }
 
+function parseCorsOrigins(raw: string): string[] {
+  return raw
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+}
+
+const corsOriginRaw = process.env.CORS_ORIGIN ?? "http://localhost:5173";
+
 export const env = {
   port: Number(process.env.PORT ?? 4000),
   jwtSecret: required("JWT_SECRET", "dev-only-insecure-secret"),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
-  corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
+  /** @deprecated corsOrigins 사용 */
+  corsOrigin: parseCorsOrigins(corsOriginRaw)[0] ?? "http://localhost:5173",
+  corsOrigins: parseCorsOrigins(corsOriginRaw),
   databaseUrl: process.env.DATABASE_URL ?? "",
   isProd: process.env.NODE_ENV === "production",
 };
