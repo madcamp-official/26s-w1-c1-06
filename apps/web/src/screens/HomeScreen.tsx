@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAuth } from "../context/AuthContext";
 
 export function HomeScreen() {
@@ -10,6 +11,8 @@ export function HomeScreen() {
         <h1>홈</h1>
         <p className="screen-header__sub">지각비 주식 시장에 오신 것을 환영합니다.</p>
       </header>
+
+      <UnconfirmedSettlementsBanner />
 
       {user && (
         <div className="home-card">

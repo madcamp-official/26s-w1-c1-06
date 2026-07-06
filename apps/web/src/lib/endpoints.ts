@@ -5,6 +5,7 @@ import type {
   FriendView,
   PositionView,
   PromiseView,
+  UnconfirmedSettlements,
 } from "../types/api";
 
 export function listFriends() {
@@ -65,17 +66,31 @@ export function demoSettle(body?: { now?: string; promiseId?: string | number })
   });
 }
 
-/** 팀원 confirm API 연동 전까지 실패해도 무시 */
+export function getUnconfirmedSettlements() {
+  return apiFetch<UnconfirmedSettlements>("/api/me/unconfirmed-settlements");
+}
+
+/**
+ * kind별로 실제 confirm 엔드포인트가 분리되어 있음 (F-12):
+ * - "position": 투자자 본인이 자신의 포지션 정산을 확인 → /api/positions/:id/confirm
+ * - "participant": 종목 본인이 자신의 약속 정산을 확인 → /api/me/participations/:promiseId/confirm
+ *
+ * 정산 결과 화면(useSettlementResult)은 결과를 화면에 먼저 그린 뒤 이 함수를 호출해
+ * "확인 처리"만 베스트 에포트로 수행한다. 두 엔드포인트 모두 멱등적이지 않아 재방문 시
+ * 409(이미 확인됨)를 반환할 수 있는데, confirm 실패가 이미 그려진 결과 화면을 에러로
+ * 덮어쓰지 않도록 어떤 사유로든 실패해도 던지지 않는다 (배너는 다음 조회 때 갱신된다).
+ */
 export async function confirmSettlement(
   kind: "position" | "participant",
   refId: string,
 ): Promise<void> {
+  const path =
+    kind === "position"
+      ? `/api/positions/${refId}/confirm`
+      : `/api/me/participations/${refId}/confirm`;
   try {
-    await apiFetch("/api/settlements/confirm", {
-      method: "POST",
-      body: JSON.stringify({ kind, refId }),
-    });
-  } catch {
-    // API 미구현 시 무시 (구현계획 H-3)
+    await apiFetch(path, { method: "POST" });
+  } catch (err) {
+    console.warn("정산 확인 처리 실패:", err);
   }
 }

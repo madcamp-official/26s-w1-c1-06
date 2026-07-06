@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AsyncState } from "../components/AsyncState";
 import { StockChart } from "../components/StockChart";
+import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAssets } from "../hooks/useAssets";
 import { useStockChart } from "../hooks/useStockChart";
 import { matchesTxFilter, TX_TYPE_META, type TxFilter } from "../lib/tx-type";
@@ -35,6 +36,8 @@ export function AssetsScreen() {
         <h1>자산</h1>
         <p className="screen-header__sub">가용·잠금 포인트와 거래 내역을 확인합니다.</p>
       </header>
+
+      <UnconfirmedSettlementsBanner />
 
       <AsyncState loading={chart.isLoading || assets.isLoading} error={chart.error ?? assets.error}>
         <StockChart data={chart.data} />
