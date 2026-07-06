@@ -126,13 +126,19 @@ export async function acceptFriendRequest(
   const pool = getPool();
   requirePool(pool);
 
-  await getFriendshipForAction(pool, requestId, addresseeId);
-  await pool.query(
+  // 조건(addressee_id, status='pending')까지 WHERE에 넣어 확인·실행을 한 쿼리로 원자화한다.
+  // 동시에 accept/reject가 들어와도 둘 중 하나만 이 WHERE에 걸리고 나머지는 rowCount=0이 된다.
+  const updated = await pool.query(
     `UPDATE friendships
      SET status = 'accepted', responded_at = now()
-     WHERE id = $1`,
-    [requestId],
+     WHERE id = $1 AND addressee_id = $2 AND status = 'pending'`,
+    [requestId, addresseeId],
   );
+  if (updated.rowCount === 0) {
+    // 실패 원인(없음/권한 없음/이미 처리됨)을 구분해 정확한 에러를 던진다.
+    await getFriendshipForAction(pool, requestId, addresseeId);
+    throw new HttpError(409, "이미 처리된 친구 요청입니다.");
+  }
 }
 
 /** POST /friends/requests/:id/reject — 거절 = 행 삭제 */
@@ -143,8 +149,15 @@ export async function rejectFriendRequest(
   const pool = getPool();
   requirePool(pool);
 
-  await getFriendshipForAction(pool, requestId, addresseeId);
-  await pool.query(`DELETE FROM friendships WHERE id = $1`, [requestId]);
+  const deleted = await pool.query(
+    `DELETE FROM friendships
+     WHERE id = $1 AND addressee_id = $2 AND status = 'pending'`,
+    [requestId, addresseeId],
+  );
+  if (deleted.rowCount === 0) {
+    await getFriendshipForAction(pool, requestId, addresseeId);
+    throw new HttpError(409, "이미 처리된 친구 요청입니다.");
+  }
 }
 
 /** GET /friends (F-03) */
