@@ -38,6 +38,9 @@ export function useSettlementResult({
     async function load() {
       setLoading(true);
       setError(null);
+      let confirmKind: "position" | "participant" | null = null;
+      let confirmRefId: string | null = null;
+
       try {
         if (kind === "investor") {
           if (!positionId) throw new Error("포지션 ID가 필요합니다.");
@@ -53,7 +56,8 @@ export function useSettlementResult({
           }
           const vm = buildInvestorResult(position, chartPoint, viewerId);
           if (!cancelled) setData(vm);
-          await confirmSettlement("position", position.id);
+          confirmKind = "position";
+          confirmRefId = position.id;
         } else {
           if (!promiseId) throw new Error("약속 ID가 필요합니다.");
           const [{ promise }, { points }] = await Promise.all([
@@ -72,7 +76,8 @@ export function useSettlementResult({
             viewerId,
           );
           if (!cancelled) setData(vm);
-          await confirmSettlement("participant", promiseId);
+          confirmKind = "participant";
+          confirmRefId = promiseId;
         }
       } catch (err) {
         if (cancelled) return;
@@ -85,6 +90,12 @@ export function useSettlementResult({
         }
       } finally {
         if (!cancelled) setLoading(false);
+      }
+
+      // confirm은 결과 조회 성공 후의 부가 효과 — try 밖에서 호출해 로딩 해제가
+      // confirm 왕복을 기다리지 않게 하고, 언마운트된 뒤에는 발사하지 않는다.
+      if (!cancelled && confirmKind && confirmRefId) {
+        await confirmSettlement(confirmKind, confirmRefId);
       }
     }
 
