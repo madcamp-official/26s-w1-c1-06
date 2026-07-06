@@ -76,7 +76,7 @@ export function getStockChart(userId: string) {
 }
 
 export function demoSettle(body?: { now?: string; promiseId?: string | number }) {
-  return apiFetch<DemoSettleResult>("/demo/settle", {
+  return apiFetch<DemoSettleResult>("/api/demo/settle", {
     method: "POST",
     body: JSON.stringify(body ?? {}),
   });

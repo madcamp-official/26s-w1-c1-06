@@ -39,7 +39,7 @@ export function createApp(): express.Express {
   });
 
   // F-16 데모: 강제 정산 (M1.0-3).
-  app.use("/demo", demoRouter);
+  app.use("/api/demo", demoRouter);
 
   // M1.1-1 인증 (F-01, F-09)
   app.use("/api/auth", authRouter);
