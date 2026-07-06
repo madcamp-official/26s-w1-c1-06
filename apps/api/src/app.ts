@@ -8,6 +8,7 @@ import { authRouter } from "./routes/auth.js";
 import { friendsRouter } from "./routes/friends.js";
 import { usersRouter } from "./routes/users.js";
 import { promisesRouter } from "./routes/promises.js";
+import { assetsRouter } from "./routes/assets.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -45,6 +46,9 @@ export function createApp(): express.Express {
 
   // M1.1-3/4 약속·GPS (F-04, F-05, F-19)
   app.use("/api/promises", promisesRouter);
+
+  // M1.2-3 자산 화면 — 가용/잠금 포인트, 원장 (F-14 일부)
+  app.use("/api/me", assetsRouter);
 
   return app;
 }
