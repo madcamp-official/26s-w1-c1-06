@@ -210,10 +210,10 @@ export async function settleOnePromise(
         now.getTime() + SELF_STOCK_OPTION_TTL_HOURS * 60 * 60 * 1000,
       );
       await client.query(
-        `INSERT INTO self_stock_options (user_id, source_promise_id, quantity_limit, expires_at)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO self_stock_options (user_id, source_promise_id, quantity_limit, granted_at, expires_at)
+         VALUES ($1, $2, $3, $4, $5)
          ON CONFLICT (user_id, source_promise_id) DO NOTHING`,
-        [userId, promiseId, SELF_STOCK_OPTION_LIMIT, expiresAt],
+        [userId, promiseId, SELF_STOCK_OPTION_LIMIT, now, expiresAt],
       );
     }
 
