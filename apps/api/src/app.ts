@@ -8,6 +8,7 @@ import { authRouter } from "./routes/auth.js";
 import { friendsRouter } from "./routes/friends.js";
 import { usersRouter } from "./routes/users.js";
 import { promisesRouter } from "./routes/promises.js";
+import { positionsRouter, meRouter } from "./routes/positions.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -45,6 +46,10 @@ export function createApp(): express.Express {
 
   // M1.1-3/4 약속·GPS (F-04, F-05, F-19)
   app.use("/api/promises", promisesRouter);
+
+  // M1.2 포지션·자기주식 (F-10/F-11, F-17/F-18)
+  app.use("/api/positions", positionsRouter);
+  app.use("/api/me", meRouter);
 
   return app;
 }
