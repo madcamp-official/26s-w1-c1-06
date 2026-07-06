@@ -4,6 +4,9 @@ import { env } from "./env.js";
 import { requireAuth } from "./auth/middleware.js";
 import { checkDbHealth } from "./db/health.js";
 import { demoRouter } from "./routes/demo.js";
+import { authRouter } from "./routes/auth.js";
+import { friendsRouter } from "./routes/friends.js";
+import { usersRouter } from "./routes/users.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -32,7 +35,14 @@ export function createApp(): express.Express {
   // F-16 데모: 강제 정산 (M1.0-3).
   app.use("/demo", demoRouter);
 
-  // TODO(M1.1~): /auth, /friends, /promises, /positions ... (7절 인벤토리)
+  // M1.1-1 인증 (F-01, F-09)
+  app.use("/api/auth", authRouter);
+
+  // M1.1-2 친구 (F-02, F-03)
+  app.use("/api/friends", friendsRouter);
+  app.use("/api/users", usersRouter);
+
+  // TODO(M1.1~): /promises, /positions ... (7절 인벤토리)
 
   return app;
 }
