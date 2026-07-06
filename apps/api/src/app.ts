@@ -12,6 +12,7 @@ import { promisesRouter } from "./routes/promises.js";
 import { positionsRouter, meRouter } from "./routes/positions.js";
 import { assetsRouter } from "./routes/assets.js";
 import { meStockRouter, stocksRouter } from "./routes/stock-chart.js";
+import { settlementInboxRouter } from "./routes/settlement-inbox.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -60,6 +61,9 @@ export function createApp(): express.Express {
   // M1.3 주가 차트 — 본인/친구 (F-08/F-13)
   app.use("/api/me", meStockRouter);
   app.use("/api/stocks", stocksRouter);
+
+  // M1.3 미확인 정산 배너 (F-12)
+  app.use("/api/me", settlementInboxRouter);
 
   return app;
 }

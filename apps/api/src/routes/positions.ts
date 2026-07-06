@@ -2,7 +2,11 @@ import { Router } from "express";
 import { requireAuth } from "../auth/middleware.js";
 import { asyncHandler } from "../lib/async-handler.js";
 import { HttpError } from "../lib/errors.js";
-import { listPositions, openPosition } from "../services/positions.js";
+import {
+  confirmPosition,
+  listPositions,
+  openPosition,
+} from "../services/positions.js";
 import {
   exerciseOption,
   listActiveOptions,
@@ -52,6 +56,16 @@ positionsRouter.get(
 
     const positions = await listPositions(req.user!.id, filter);
     res.json({ positions });
+  }),
+);
+
+positionsRouter.post(
+  "/:id/confirm",
+  asyncHandler(async (req, res) => {
+    const id = req.params.id;
+    if (!id) throw new HttpError(400, "포지션 id가 필요합니다.");
+    await confirmPosition(req.user!.id, id);
+    res.json({ ok: true });
   }),
 );
 

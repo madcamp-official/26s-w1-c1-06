@@ -3,6 +3,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { TabLayout } from "./layouts/TabLayout";
 import { AssetsScreen } from "./screens/AssetsScreen";
 import { DemoScreen } from "./screens/DemoScreen";
+import { FriendDetailScreen } from "./screens/FriendDetailScreen";
 import { FriendsMarketScreen } from "./screens/FriendsMarketScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { LoginScreen } from "./screens/LoginScreen";
@@ -34,6 +35,7 @@ export function App() {
           <Route path="assets" element={<AssetsScreen />} />
           <Route path="demo" element={<DemoScreen />} />
         </Route>
+        <Route path="friends/:userId" element={<FriendDetailScreen />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
