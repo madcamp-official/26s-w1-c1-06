@@ -435,6 +435,39 @@ export async function checkinToPromise(
   }
 }
 
+/** POST /me/participations/:promiseId/confirm — 종목 본인의 미확인 정산 배너 소거 (F-12). */
+export async function confirmParticipation(
+  userId: string,
+  promiseId: string,
+): Promise<void> {
+  const pool = getPool();
+  requirePool(pool);
+
+  const updated = await pool.query(
+    `UPDATE promise_participants
+     SET result_confirmed_at = now()
+     WHERE promise_id = $1 AND user_id = $2
+       AND verdict IS NOT NULL AND result_confirmed_at IS NULL`,
+    [promiseId, userId],
+  );
+  if (updated.rowCount === 0) {
+    const check = await pool.query<{
+      verdict: string | null;
+      result_confirmed_at: Date | null;
+    }>(
+      `SELECT verdict, result_confirmed_at FROM promise_participants
+       WHERE promise_id = $1 AND user_id = $2`,
+      [promiseId, userId],
+    );
+    const row = check.rows[0];
+    if (!row) throw new HttpError(404, "참여 정보를 찾을 수 없습니다.");
+    if (row.verdict === null) {
+      throw new HttpError(409, "아직 정산되지 않았습니다.");
+    }
+    throw new HttpError(409, "이미 확인한 정산입니다.");
+  }
+}
+
 /** GET /promises/:id/participants (F-05/F-06/F-19) */
 export async function getPromiseParticipants(
   viewerId: string,

@@ -10,6 +10,7 @@ import { usersRouter } from "./routes/users.js";
 import { promisesRouter } from "./routes/promises.js";
 import { positionsRouter, meRouter } from "./routes/positions.js";
 import { assetsRouter } from "./routes/assets.js";
+import { settlementInboxRouter } from "./routes/settlement-inbox.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -54,6 +55,9 @@ export function createApp(): express.Express {
 
   // M1.2-3 자산 화면 — 가용/잠금 포인트, 원장 (F-14 일부)
   app.use("/api/me", assetsRouter);
+
+  // M1.3 미확인 정산 배너 (F-12)
+  app.use("/api/me", settlementInboxRouter);
 
   return app;
 }
