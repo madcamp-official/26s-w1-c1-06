@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { AuthField, AuthLayout, AuthLink } from "../components/AuthLayout";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../lib/api";
 
@@ -27,38 +28,57 @@ export function SignupScreen() {
   }
 
   return (
-    <main style={{ padding: 24, maxWidth: 400, margin: "0 auto" }}>
-      <h1>회원가입</h1>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <input
+    <AuthLayout
+      title="계정 만들기"
+      subtitle="가입 즉시 100,000P와 주식이 발행됩니다"
+      footer={
+        <p>
+          이미 계정이 있으신가요? <AuthLink to="/login">로그인</AuthLink>
+        </p>
+      }
+    >
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <AuthField
+          id="signup-email"
+          label="이메일"
           type="email"
-          placeholder="이메일"
+          placeholder="name@example.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          onChange={setEmail}
+          autoComplete="email"
+          icon="email"
         />
-        <input
+        <AuthField
+          id="signup-nickname"
+          label="닉네임"
           type="text"
-          placeholder="닉네임"
+          placeholder="시장에 표시될 이름"
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          required
+          onChange={setNickname}
+          autoComplete="nickname"
+          icon="user"
         />
-        <input
+        <AuthField
+          id="signup-password"
+          label="비밀번호"
           type="password"
-          placeholder="비밀번호"
+          placeholder="8자 이상"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          onChange={setPassword}
+          autoComplete="new-password"
+          icon="lock"
         />
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit" disabled={isSubmitting}>
+
+        {error && <p className="auth-error" role="alert">{error}</p>}
+
+        <button
+          type="submit"
+          className="auth-submit"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "가입 중..." : "회원가입"}
         </button>
       </form>
-      <p>
-        이미 계정이 있으신가요? <Link to="/login">로그인</Link>
-      </p>
-    </main>
+    </AuthLayout>
   );
 }
