@@ -1,0 +1,35 @@
+import { Router } from "express";
+import { env } from "../env.js";
+import { runSettlementNow } from "../settlement/scheduler.js";
+
+export const demoRouter = Router();
+
+/** F-16 데모: 강제 정산. 비프로덕션 또는 DEMO_MODE=true 에서만 허용. */
+demoRouter.post("/settle", async (req, res) => {
+  if (env.isProd && process.env.DEMO_MODE !== "true") {
+    res.status(403).json({ error: "데모 정산은 비프로덕션 환경에서만 사용 가능합니다." });
+    return;
+  }
+
+  try {
+    const now =
+      typeof req.body?.now === "string" ? new Date(req.body.now) : undefined;
+    const promiseId =
+      typeof req.body?.promiseId === "number"
+        ? req.body.promiseId
+        : typeof req.body?.promiseId === "string"
+          ? Number(req.body.promiseId)
+          : undefined;
+
+    if (now !== undefined && Number.isNaN(now.getTime())) {
+      res.status(400).json({ error: "now는 유효한 ISO 시각 문자열이어야 합니다." });
+      return;
+    }
+
+    const result = await runSettlementNow({ now, promiseId });
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
+  }
+});
