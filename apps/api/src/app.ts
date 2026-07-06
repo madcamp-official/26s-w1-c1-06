@@ -3,6 +3,7 @@ import express from "express";
 import { env } from "./env.js";
 import { requireAuth } from "./auth/middleware.js";
 import { checkDbHealth } from "./db/health.js";
+import { demoRouter } from "./routes/demo.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -27,6 +28,9 @@ export function createApp(): express.Express {
   app.get("/api/me/ping", requireAuth, (req, res) => {
     res.json({ userId: req.user?.id });
   });
+
+  // F-16 데모: 강제 정산 (M1.0-3).
+  app.use("/demo", demoRouter);
 
   // TODO(M1.1~): /auth, /friends, /promises, /positions ... (7절 인벤토리)
 
