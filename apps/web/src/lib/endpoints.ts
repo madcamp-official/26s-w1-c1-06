@@ -50,6 +50,22 @@ export function listPositions(status?: "open" | "settled") {
   return apiFetch<{ positions: PositionView[] }>(`/api/positions${q}`);
 }
 
+export function openPosition(body: {
+  stockUserId: string;
+  promiseId: string;
+  direction: "buy" | "short";
+  quantity: number;
+}) {
+  return apiFetch<{ position: PositionView }>("/api/positions", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function getMyAssets() {
+  return apiFetch<{ availablePoints: number; lockedPoints: number }>("/api/me/assets");
+}
+
 export function getMyStockChart() {
   return apiFetch<{ points: ChartPoint[] }>("/api/me/stock");
 }
@@ -65,17 +81,18 @@ export function demoSettle(body?: { now?: string; promiseId?: string | number })
   });
 }
 
-/** 팀원 confirm API 연동 전까지 실패해도 무시 */
+/** F-12 미확인 정산 확인 — 베스트 에포트(실패해도 결과 화면은 유지). */
 export async function confirmSettlement(
   kind: "position" | "participant",
   refId: string,
 ): Promise<void> {
   try {
-    await apiFetch("/api/settlements/confirm", {
-      method: "POST",
-      body: JSON.stringify({ kind, refId }),
-    });
+    const path =
+      kind === "position"
+        ? `/api/positions/${refId}/confirm`
+        : `/api/me/participations/${refId}/confirm`;
+    await apiFetch(path, { method: "POST", body: JSON.stringify({}) });
   } catch {
-    // API 미구현 시 무시 (구현계획 H-3)
+    // confirm은 부가 효과 — 409·404 등 실패해도 결과 조회 UI를 망가뜨리지 않음
   }
 }
