@@ -7,6 +7,7 @@ import { demoRouter } from "./routes/demo.js";
 import { authRouter } from "./routes/auth.js";
 import { friendsRouter } from "./routes/friends.js";
 import { usersRouter } from "./routes/users.js";
+import { promisesRouter } from "./routes/promises.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -42,7 +43,8 @@ export function createApp(): express.Express {
   app.use("/api/friends", friendsRouter);
   app.use("/api/users", usersRouter);
 
-  // TODO(M1.1~): /promises, /positions ... (7절 인벤토리)
+  // M1.1-3/4 약속·GPS (F-04, F-05, F-19)
+  app.use("/api/promises", promisesRouter);
 
   return app;
 }

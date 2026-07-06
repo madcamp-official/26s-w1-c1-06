@@ -27,6 +27,12 @@ demoRouter.post("/settle", async (req, res) => {
     }
 
     const result = await runSettlementNow({ now, promiseId });
+    if (result.failedIds.length > 0) {
+      res
+        .status(500)
+        .json({ ok: false, ...result, error: "일부 약속 정산에 실패했습니다." });
+      return;
+    }
     res.json({ ok: true, ...result });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
