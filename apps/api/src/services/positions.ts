@@ -266,6 +266,42 @@ export async function openPosition(
   }
 }
 
+/** POST /positions/:id/confirm — 투자자의 미확인 정산 배너 소거 (F-12). */
+export async function confirmPosition(
+  investorId: string,
+  positionId: string,
+): Promise<void> {
+  const pool = getPool();
+  requirePool(pool);
+
+  const updated = await pool.query(
+    `UPDATE positions
+     SET confirmed_at = now()
+     WHERE id = $1 AND investor_id = $2
+       AND status = 'settled' AND confirmed_at IS NULL`,
+    [positionId, investorId],
+  );
+  if (updated.rowCount === 0) {
+    const check = await pool.query<{
+      investor_id: string;
+      status: string;
+      confirmed_at: Date | null;
+    }>(
+      `SELECT investor_id, status, confirmed_at FROM positions WHERE id = $1`,
+      [positionId],
+    );
+    const row = check.rows[0];
+    if (!row) throw new HttpError(404, "포지션을 찾을 수 없습니다.");
+    if (row.investor_id !== investorId) {
+      throw new HttpError(403, "본인 포지션만 확인할 수 있습니다.");
+    }
+    if (row.status !== "settled") {
+      throw new HttpError(409, "아직 정산되지 않았습니다.");
+    }
+    throw new HttpError(409, "이미 확인한 정산입니다.");
+  }
+}
+
 /** GET /positions — 내 포지션 목록. */
 export async function listPositions(
   investorId: string,
