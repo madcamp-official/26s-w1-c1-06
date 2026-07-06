@@ -147,6 +147,7 @@ const promiseSelect = `
 export async function createPromise(
   creatorId: string,
   input: CreatePromiseInput,
+  now: Date = new Date(),
 ): Promise<{ id: string }> {
   const title = input.title.trim();
   const placeName = input.placeName.trim();
@@ -160,6 +161,9 @@ export async function createPromise(
 
   if (Number.isNaN(input.promisedAt.getTime())) {
     throw new HttpError(400, "약속 시각이 올바르지 않습니다.");
+  }
+  if (input.promisedAt.getTime() <= now.getTime()) {
+    throw new HttpError(400, "약속 시각은 현재보다 미래여야 합니다.");
   }
 
   const uniqueInvites = [...new Set(input.inviteUserIds.map(String))].filter(

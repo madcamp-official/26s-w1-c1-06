@@ -33,9 +33,14 @@ export function stopSettlementScheduler(): void {
 
 async function runSettlementSafe(pool: pg.Pool): Promise<void> {
   try {
-    const { settledIds } = await runSettlement(pool);
+    const { settledIds, failedIds } = await runSettlement(pool);
     if (settledIds.length > 0) {
       console.log(`[settlement] 정산 완료: promise ids ${settledIds.join(", ")}`);
+    }
+    if (failedIds.length > 0) {
+      console.error(
+        `[settlement] 정산 실패(다음 틱 재시도): promise ids ${failedIds.join(", ")}`,
+      );
     }
   } catch (err) {
     console.error("[settlement] 정산 오류:", err);
