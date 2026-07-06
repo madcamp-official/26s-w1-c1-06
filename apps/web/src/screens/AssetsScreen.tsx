@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AsyncState } from "../components/AsyncState";
 import { StockChart } from "../components/StockChart";
 import { useAssets } from "../hooks/useAssets";
 import { useStockChart } from "../hooks/useStockChart";
@@ -29,107 +30,85 @@ export function AssetsScreen() {
   );
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>자산</h1>
+    <div className="screen">
+      <header className="screen-header">
+        <h1>자산</h1>
+        <p className="screen-header__sub">가용·잠금 포인트와 거래 내역을 확인합니다.</p>
+      </header>
 
-      {chart.isLoading && <p>차트 불러오는 중...</p>}
-      {chart.error && <p style={{ color: "red" }}>{chart.error}</p>}
-      {!chart.isLoading && !chart.error && <StockChart data={chart.data} />}
+      <AsyncState loading={chart.isLoading || assets.isLoading} error={chart.error ?? assets.error}>
+        <StockChart data={chart.data} />
 
-      {assets.error && <p style={{ color: "red" }}>{assets.error}</p>}
-      {assets.isLoading && <p>자산 정보 불러오는 중...</p>}
-
-      {assets.summary && (
-        <div style={{ display: "flex", gap: 12, margin: "16px 0" }}>
-          <div
-            style={{
-              flex: 1,
-              padding: 16,
-              borderRadius: 12,
-              background: "#f5f5f5",
-            }}
-          >
-            <div style={{ fontSize: 13, color: "#888" }}>가용 포인트</div>
-            <div style={{ fontSize: 22, fontWeight: 700 }}>
-              {assets.summary.availablePoints.toLocaleString()}P
+        {assets.summary && (
+          <div className="stat-grid" style={{ margin: "16px 0" }}>
+            <div className="stat-card">
+              <span className="stat-card__label">가용 포인트</span>
+              <span className="stat-card__value">
+                {assets.summary.availablePoints.toLocaleString()}P
+              </span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-card__label">잠금 포인트</span>
+              <span className="stat-card__value">
+                {assets.summary.lockedPoints.toLocaleString()}P
+              </span>
             </div>
           </div>
-          <div
-            style={{
-              flex: 1,
-              padding: 16,
-              borderRadius: 12,
-              background: "#f5f5f5",
-            }}
-          >
-            <div style={{ fontSize: 13, color: "#888" }}>잠금 포인트</div>
-            <div style={{ fontSize: 22, fontWeight: 700 }}>
-              {assets.summary.lockedPoints.toLocaleString()}P
-            </div>
-          </div>
-        </div>
-      )}
+        )}
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        {FILTER_TABS.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setFilter(tab.key)}
-            style={{
-              padding: "6px 14px",
-              borderRadius: 16,
-              border: "1px solid #ddd",
-              background: filter === tab.key ? "#222" : "#fff",
-              color: filter === tab.key ? "#fff" : "#222",
-              cursor: "pointer",
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {filteredTransactions.length === 0 && !assets.isLoading && (
-        <p style={{ color: "#888" }}>내역이 없습니다.</p>
-      )}
-
-      <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-        {filteredTransactions.map((tx) => {
-          const meta = TX_TYPE_META[tx.txType];
-          const isPositive = tx.amount > 0;
-          return (
-            <li
-              key={tx.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "10px 0",
-                borderBottom: "1px solid #eee",
-              }}
+        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+          {FILTER_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`btn ${filter === tab.key ? "btn--primary" : "btn--secondary"}`}
+              onClick={() => setFilter(tab.key)}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 18 }}>{meta.icon}</span>
-                <div>
-                  <div>{meta.label}</div>
-                  <div style={{ fontSize: 12, color: "#888" }}>
-                    {formatDate(tx.createdAt)}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {filteredTransactions.length === 0 ? (
+          <p className="screen-header__sub">내역이 없습니다.</p>
+        ) : (
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            {filteredTransactions.map((tx) => {
+              const meta = TX_TYPE_META[tx.txType];
+              const isPositive = tx.amount > 0;
+              return (
+                <li
+                  key={tx.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "10px 0",
+                    borderBottom: "1px solid var(--kakao-gray-200)",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 18 }}>{meta.icon}</span>
+                    <div>
+                      <div>{meta.label}</div>
+                      <div className="screen-header__sub">{formatDate(tx.createdAt)}</div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div
-                style={{
-                  fontWeight: 700,
-                  color: isPositive ? RISE_COLOR : FALL_COLOR,
-                }}
-              >
-                {isPositive ? "+" : ""}
-                {tx.amount.toLocaleString()}P
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      color: isPositive ? RISE_COLOR : FALL_COLOR,
+                    }}
+                  >
+                    {isPositive ? "+" : ""}
+                    {tx.amount.toLocaleString()}P
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </AsyncState>
     </div>
   );
 }

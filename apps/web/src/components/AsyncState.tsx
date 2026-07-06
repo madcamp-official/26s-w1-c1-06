@@ -1,0 +1,64 @@
+import type { ReactNode } from "react";
+
+interface AsyncStateProps {
+  loading?: boolean;
+  error?: string | null;
+  empty?: boolean;
+  emptyTitle?: string;
+  emptyMessage?: string;
+  onRetry?: () => void;
+  children: ReactNode;
+}
+
+export function AsyncState({
+  loading,
+  error,
+  empty,
+  emptyTitle = "아직 내용이 없어요",
+  emptyMessage = "새로운 활동이 생기면 여기에 표시됩니다.",
+  onRetry,
+  children,
+}: AsyncStateProps) {
+  if (loading) {
+    return (
+      <div className="state-panel">
+        <div className="state-icon" aria-hidden>
+          ⏳
+        </div>
+        <p className="state-title">불러오는 중...</p>
+        <p className="state-message">잠시만 기다려 주세요.</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="state-panel state-panel--error">
+        <div className="state-icon" aria-hidden>
+          ⚠️
+        </div>
+        <p className="state-title">문제가 발생했어요</p>
+        <p className="state-message">{error}</p>
+        {onRetry && (
+          <button type="button" className="btn btn--primary" onClick={onRetry}>
+            다시 시도
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (empty) {
+    return (
+      <div className="state-panel">
+        <div className="state-icon" aria-hidden>
+          💬
+        </div>
+        <p className="state-title">{emptyTitle}</p>
+        <p className="state-message">{emptyMessage}</p>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}

@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import { createCorsOptions } from "./lib/cors.js";
 import { env } from "./env.js";
 import { requireAuth } from "./auth/middleware.js";
 import { checkDbHealth } from "./db/health.js";
@@ -16,7 +17,7 @@ import { settlementInboxRouter } from "./routes/settlement-inbox.js";
 export function createApp(): express.Express {
   const app = express();
 
-  app.use(cors({ origin: env.corsOrigin }));
+  app.use(cors(createCorsOptions()));
   app.use(express.json());
 
   // 배포 도달성 확인용 (구현계획 M0-6).

@@ -8,6 +8,7 @@ import { FriendsMarketScreen } from "./screens/FriendsMarketScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { LoginScreen } from "./screens/LoginScreen";
 import { PromisesScreen } from "./screens/PromisesScreen";
+import { SettlementResultPage } from "./screens/SettlementResultPage";
 import { SignupScreen } from "./screens/SignupScreen";
 
 export function App() {
@@ -17,6 +18,15 @@ export function App() {
       <Route path="/signup" element={<SignupScreen />} />
 
       <Route element={<ProtectedRoute />}>
+        <Route
+          path="results/position/:positionId"
+          element={<SettlementResultPage kind="investor" />}
+        />
+        <Route
+          path="results/stock/:promiseId"
+          element={<SettlementResultPage kind="stock" />}
+        />
+
         <Route element={<TabLayout />}>
           <Route index element={<Navigate to="/home" replace />} />
           <Route path="home" element={<HomeScreen />} />
