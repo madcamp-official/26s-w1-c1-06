@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { AuthField, AuthLayout, AuthLink } from "../components/AuthLayout";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../lib/api";
 
@@ -26,31 +27,47 @@ export function LoginScreen() {
   }
 
   return (
-    <main style={{ padding: 24, maxWidth: 400, margin: "0 auto" }}>
-      <h1>로그인</h1>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <input
+    <AuthLayout
+      title="다시 오신 것을 환영합니다"
+      subtitle="Latestock 계정으로 로그인하세요"
+      footer={
+        <p>
+          계정이 없으신가요? <AuthLink to="/signup">무료로 가입하기</AuthLink>
+        </p>
+      }
+    >
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <AuthField
+          id="login-email"
+          label="이메일"
           type="email"
-          placeholder="이메일"
+          placeholder="name@example.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          onChange={setEmail}
+          autoComplete="email"
+          icon="email"
         />
-        <input
+        <AuthField
+          id="login-password"
+          label="비밀번호"
           type="password"
-          placeholder="비밀번호"
+          placeholder="8자 이상"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          onChange={setPassword}
+          autoComplete="current-password"
+          icon="lock"
         />
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit" disabled={isSubmitting}>
+
+        {error && <p className="auth-error" role="alert">{error}</p>}
+
+        <button
+          type="submit"
+          className="auth-submit"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "로그인 중..." : "로그인"}
         </button>
       </form>
-      <p>
-        계정이 없으신가요? <Link to="/signup">회원가입</Link>
-      </p>
-    </main>
+    </AuthLayout>
   );
 }

@@ -51,6 +51,22 @@ export function listPositions(status?: "open" | "settled") {
   return apiFetch<{ positions: PositionView[] }>(`/api/positions${q}`);
 }
 
+export function openPosition(body: {
+  stockUserId: string;
+  promiseId: string;
+  direction: "buy" | "short";
+  quantity: number;
+}) {
+  return apiFetch<{ position: PositionView }>("/api/positions", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function getMyAssets() {
+  return apiFetch<{ availablePoints: number; lockedPoints: number }>("/api/me/assets");
+}
+
 export function getMyStockChart() {
   return apiFetch<{ points: ChartPoint[] }>("/api/me/stock");
 }
