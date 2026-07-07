@@ -13,7 +13,7 @@ export type EtfSide = "risky" | "safe";
 export interface EtfThemeRule {
   key: string;
   side: EtfSide;
-  groupSize: 1 | 3;
+  groupSize: 3;
   /** risky=short 고정, safe=buy 고정 (바스켓 전체 단일 방향). */
   direction: PositionDirection;
   /** risky: 그룹 평균 ewma_late_p가 이 값 "이상"이어야 매치. safe: 이 값 "이하"여야 매치. */
@@ -28,15 +28,6 @@ export interface EtfThemeRule {
  * 새 테마를 추가할 때는 이 배열에 행만 추가하면 되고, 아래 함수 로직은 건드릴 필요가 없다.
  */
 export const ETF_THEME_RULES: readonly EtfThemeRule[] = [
-  {
-    key: "risky-1-extreme",
-    side: "risky",
-    groupSize: 1,
-    direction: "short",
-    threshold: 0.75,
-    name: "이 구역의 지각대장",
-    emoji: "🚨",
-  },
   {
     key: "risky-3-high",
     side: "risky",
@@ -54,15 +45,6 @@ export const ETF_THEME_RULES: readonly EtfThemeRule[] = [
     threshold: 0.4,
     name: "시한폭탄 트리오",
     emoji: "⏰",
-  },
-  {
-    key: "safe-1-extreme",
-    side: "safe",
-    groupSize: 1,
-    direction: "buy",
-    threshold: 0.1,
-    name: "등대지기",
-    emoji: "🕯️",
   },
   {
     key: "safe-3-high",

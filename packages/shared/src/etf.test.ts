@@ -6,7 +6,7 @@ function friend(userId: string, ewmaLateP: number): FriendLateStat {
 }
 
 describe("suggestEtfThemes", () => {
-  it("친구 4명 — risky 3인 중간 구간(시한폭탄 트리오) + safe 1인 극단(등대지기) 매치", () => {
+  it("친구 4명 — risky 3인 중간 구간(시한폭탄 트리오) + safe 3인 중간 구간(모범생 클럽) 매치", () => {
     const candidates = [
       friend("영희", 0.68),
       friend("민수", 0.52),
@@ -22,10 +22,10 @@ describe("suggestEtfThemes", () => {
     expect(risky?.direction).toBe("short");
     expect(risky?.memberUserIds).toEqual(["영희", "민수", "지훈"]);
 
-    const safe = result.find((s) => s.key === "safe-1-extreme");
+    const safe = result.find((s) => s.key === "safe-3-mid");
     expect(safe).toBeDefined();
     expect(safe?.direction).toBe("buy");
-    expect(safe?.memberUserIds).toEqual(["수아"]);
+    expect(safe?.memberUserIds).toEqual(["수아", "지훈", "민수"]);
   });
 
   it("평균이 임계값에 정확히 같으면 매치(경계값, >=)", () => {
@@ -36,13 +36,11 @@ describe("suggestEtfThemes", () => {
   });
 
   it("친구 수가 그룹 크기보다 적으면 해당 규모의 규칙은 전부 건너뛴다", () => {
-    // 2명뿐이라 groupSize=3 규칙(대부분)은 스킵되고 groupSize=1만 시도된다.
+    // 모든 규칙이 groupSize=3인데 후보가 2명뿐이라 어떤 규칙도 매치될 수 없다.
     const candidates = [friend("a", 0.9), friend("b", 0.85)];
     const result = suggestEtfThemes(candidates);
 
-    const risky = result.find((s) => s.direction === "short");
-    expect(risky?.key).toBe("risky-1-extreme");
-    expect(risky?.memberUserIds).toEqual(["a"]);
+    expect(result).toEqual([]);
   });
 
   it("아무 임계값도 못 넘으면 해당 side는 추천이 아예 없다", () => {
@@ -60,7 +58,7 @@ describe("suggestEtfThemes", () => {
     expect(suggestEtfThemes([])).toEqual([]);
   });
 
-  it("같은 side 안에서는 그룹 크기가 다른 최대 1개 테마만 채택한다", () => {
+  it("같은 side 안에서 여러 임계값 규칙에 매치되어도 최대 1개 테마만 채택한다", () => {
     const candidates = [
       friend("a", 0.9),
       friend("b", 0.85),
@@ -69,7 +67,9 @@ describe("suggestEtfThemes", () => {
     const result = suggestEtfThemes(candidates);
     const riskyMatches = result.filter((s) => s.direction === "short");
     expect(riskyMatches).toHaveLength(1);
-    // 1인 극단(0.75 이상)이 3인 규칙보다 먼저 검사되므로 이게 채택된다.
-    expect(riskyMatches[0]?.key).toBe("risky-1-extreme");
+    // 3인 평균(0.85)이 risky-3-high(0.6 이상)에도, risky-3-mid(0.4 이상)에도 매치되지만
+    // 배열 순서상 risky-3-high가 먼저 검사되므로 이게 채택된다.
+    expect(riskyMatches[0]?.key).toBe("risky-3-high");
+    expect(riskyMatches[0]?.memberUserIds).toEqual(["a", "b", "c"]);
   });
 });
