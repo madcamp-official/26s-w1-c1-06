@@ -8,6 +8,8 @@ import { FriendsMarketScreen } from "./screens/FriendsMarketScreen";
 import { HistoryScreen } from "./screens/HistoryScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { LoginScreen } from "./screens/LoginScreen";
+import { PromiseCreateScreen } from "./screens/PromiseCreateScreen";
+import { PromiseDetailScreen } from "./screens/PromiseDetailScreen";
 import { PromisesScreen } from "./screens/PromisesScreen";
 import { SettlementResultPage } from "./screens/SettlementResultPage";
 import { SignupScreen } from "./screens/SignupScreen";
@@ -38,6 +40,8 @@ export function App() {
           <Route path="demo" element={<DemoScreen />} />
         </Route>
         <Route path="friends/:userId" element={<FriendDetailScreen />} />
+        <Route path="promises/new" element={<PromiseCreateScreen />} />
+        <Route path="promises/:id" element={<PromiseDetailScreen />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

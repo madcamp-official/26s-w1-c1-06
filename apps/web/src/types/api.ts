@@ -88,3 +88,22 @@ export interface UnconfirmedSettlements {
   asInvestor: UnconfirmedAsInvestor[];
   totalCount: number;
 }
+
+/** GET /promises/:id/participants 참여자 1행 (F-05/F-06/F-19, R-1/R-5 마스킹 적용됨). */
+export interface ParticipantStatusView {
+  userId: string;
+  displayName: string;
+  inviteStatus: InviteStatus;
+  /** 마스킹 규칙에 의해 숨겨졌으면 null (약속 시각 전 타인). */
+  checkinAt: string | null;
+  /** 인증 여부 자체가 마스킹되었는지 (UI 표기용). */
+  checkinMasked: boolean;
+  /** 베팅 진입점 노출 가능 여부 (친구가 아니면 false, R-5). */
+  bettable: boolean;
+  isSelf: boolean;
+}
+
+export interface PromiseParticipantsView {
+  promisedAt: string;
+  participants: ParticipantStatusView[];
+}
