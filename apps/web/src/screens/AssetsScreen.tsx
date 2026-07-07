@@ -2,6 +2,7 @@ import { BASE_STOCK_PRICE } from "@latestock/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AsyncState } from "../components/AsyncState";
+import { EtfBasketsPanel } from "../components/EtfBasketsPanel";
 import { OpenPositionsPanel } from "../components/OpenPositionsPanel";
 import { OptionPositionsPanel } from "../components/OptionPositionsPanel";
 import { StockCandlestickChart } from "../components/StockCandlestickChart";
@@ -10,6 +11,7 @@ import { OrderPanel } from "../components/trade/OrderPanel";
 import { StockRankingTable } from "../components/trade/StockRankingTable";
 import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAssets } from "../hooks/useAssets";
+import { useEtfBaskets } from "../hooks/useEtfBaskets";
 import { useOpenPositions } from "../hooks/useOpenPositions";
 import { useOptions } from "../hooks/useOptions";
 import { usePolling } from "../hooks/usePolling";
@@ -34,6 +36,7 @@ export function AssetsScreen() {
   const openPositions = useOpenPositions();
   const options = useOptions();
   const unconfirmed = useUnconfirmedSettlements();
+  const etfBaskets = useEtfBaskets();
   const { promises, isLoading: promisesLoading } = useStockPromises(selectedFriend?.userId);
 
   const chart = selectedFriend ? friendChart : ownChart;
@@ -59,6 +62,7 @@ export function AssetsScreen() {
   usePolling(() => {
     loadFriends();
     openPositions.reload();
+    etfBaskets.reload();
   }, 25000);
   usePolling(unconfirmed.reload, 20000);
 
@@ -112,6 +116,13 @@ export function AssetsScreen() {
         isLoading={options.isLoading}
         error={options.error}
         onRetry={options.reload}
+      />
+
+      <EtfBasketsPanel
+        baskets={etfBaskets.baskets}
+        isLoading={etfBaskets.isLoading}
+        error={etfBaskets.error}
+        onRetry={etfBaskets.reload}
       />
 
       <AsyncState

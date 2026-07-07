@@ -3,7 +3,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AnimatedNumber } from "../components/AnimatedNumber";
 import { AsyncState } from "../components/AsyncState";
+import { EtfRecommendationsSection } from "../components/EtfRecommendationsSection";
 import { StockCandlestickChart } from "../components/StockCandlestickChart";
+import { EtfBasketBuilder } from "../components/trade/EtfBasketBuilder";
 import { OptionOrderPanel } from "../components/trade/OptionOrderPanel";
 import { OrderPanel } from "../components/trade/OrderPanel";
 import { StockRankingTable } from "../components/trade/StockRankingTable";
@@ -21,6 +23,7 @@ export function FriendsMarketScreen() {
   const [friends, setFriends] = useState<FriendView[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [availablePoints, setAvailablePoints] = useState<number | null>(null);
+  const [isBasketBuilderOpen, setIsBasketBuilderOpen] = useState(false);
 
   const selectedId = searchParams.get("stock");
   const selected = friends?.find((f) => f.userId === selectedId) ?? friends?.[0] ?? null;
@@ -79,8 +82,26 @@ export function FriendsMarketScreen() {
               <strong>{availablePoints.toLocaleString()}P</strong>
             </div>
           )}
+          <button
+            type="button"
+            className="btn btn--secondary"
+            onClick={() => setIsBasketBuilderOpen(true)}
+          >
+            펀드 직접 만들기
+          </button>
         </div>
       </header>
+
+      <EtfRecommendationsSection onSuccess={loadMarket} />
+
+      {isBasketBuilderOpen && friends && (
+        <EtfBasketBuilder
+          friends={friends}
+          availablePoints={availablePoints}
+          onClose={() => setIsBasketBuilderOpen(false)}
+          onSuccess={loadMarket}
+        />
+      )}
 
       <AsyncState
         loading={friends === null && !loadError}
