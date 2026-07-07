@@ -4,6 +4,7 @@ import type {
   DemoSettleResult,
   FriendView,
   PositionView,
+  PromiseParticipantsView,
   PromiseView,
   UnconfirmedSettlements,
 } from "../types/api";
@@ -33,6 +34,12 @@ export function createPromise(body: {
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export function getPromiseParticipants(promiseId: string) {
+  return apiFetch<PromiseParticipantsView>(
+    `/api/promises/${promiseId}/participants`,
+  );
 }
 
 export function checkinPromise(
