@@ -3,7 +3,7 @@ import {
   computeLiquidationThreshold,
   computeLockedPoints,
 } from "@latestock/shared";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useBettorSummary } from "../../hooks/useBettorSummary";
 import { ApiError } from "../../lib/api";
 import { openPosition } from "../../lib/endpoints";
@@ -47,9 +47,11 @@ export function OrderPanel({
     promiseId || undefined,
   );
   const selectedPromise = promises.find((p) => p.id === promiseId) ?? null;
-  const bettingClosed = selectedPromise
-    ? new Date(selectedPromise.promisedAt).getTime() <= Date.now()
-    : false;
+  const [bettingClosed, setBettingClosed] = useState(false);
+
+  useEffect(() => {
+    if (!selectedPromise) setBettingClosed(false);
+  }, [selectedPromise]);
 
   async function handleSubmit() {
     if (!stock) {
@@ -150,7 +152,13 @@ export function OrderPanel({
         </select>
       </label>
 
-      {selectedPromise && <BettingCountdown deadline={selectedPromise.promisedAt} />}
+      {selectedPromise && (
+        <BettingCountdown
+          key={selectedPromise.id}
+          deadline={selectedPromise.promisedAt}
+          onClosedChange={setBettingClosed}
+        />
+      )}
 
       {bettorSummary &&
         (bettorSummary.buyCount > 0 || bettorSummary.shortCount > 0) && (

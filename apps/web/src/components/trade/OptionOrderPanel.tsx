@@ -1,5 +1,5 @@
 import { computeOptionPremium, type OptionType } from "@latestock/shared";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ApiError } from "../../lib/api";
 import { buyOption } from "../../lib/endpoints";
 import { InlineToast } from "../InlineToast";
@@ -38,9 +38,11 @@ export function OptionOrderPanel({
       : 0;
   const payoutEstimate = stock && quantity > 0 ? currentPrice * quantity : 0;
   const selectedPromise = promises.find((item) => item.id === promiseId) ?? null;
-  const bettingClosed = selectedPromise
-    ? new Date(selectedPromise.promisedAt).getTime() <= Date.now()
-    : false;
+  const [bettingClosed, setBettingClosed] = useState(false);
+
+  useEffect(() => {
+    if (!selectedPromise) setBettingClosed(false);
+  }, [selectedPromise]);
 
   async function handleSubmit() {
     if (!stock) {
@@ -127,7 +129,13 @@ export function OptionOrderPanel({
         </select>
       </label>
 
-      {selectedPromise && <BettingCountdown deadline={selectedPromise.promisedAt} />}
+      {selectedPromise && (
+        <BettingCountdown
+          key={selectedPromise.id}
+          deadline={selectedPromise.promisedAt}
+          onClosedChange={setBettingClosed}
+        />
+      )}
 
       <label className="trade-field">
         <span className="trade-field__label">수량 (계약)</span>
