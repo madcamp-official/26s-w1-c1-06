@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import noShowMeme from "../assets/no-show-meme.jpg";
 import { useAuth } from "../context/AuthContext";
-import { useUnconfirmedSettlements } from "../hooks/useUnconfirmedSettlements";
-import { usePolling } from "../hooks/usePolling";
 import { confirmSettlement } from "../lib/endpoints";
 import {
   buildVMFromUnconfirmedInvestor,
@@ -11,6 +9,7 @@ import {
   type SettlementResultVM,
 } from "../lib/settlement-result";
 import { FALL_COLOR, RISE_COLOR } from "../theme";
+import type { UnconfirmedSettlements } from "../types/api";
 import { ReactionBar } from "./ReactionBar";
 import { SettlementHero } from "./SettlementHero";
 
@@ -47,24 +46,25 @@ function Confetti() {
   );
 }
 
+interface AutoSettlementRevealProps {
+  data: UnconfirmedSettlements | null;
+  reload: () => void;
+}
+
 /**
  * M6-1: 미확인 정산이 있으면 홈 진입 즉시 결과를 모달로 띄운다.
  * useUnconfirmedSettlements가 이미 verdict·payout 등을 다 갖고 있어서 별도 조회 없이
  * 즉석에서 결과 VM을 만든다(buildVMFromUnconfirmed*).
+ *
+ * data·reload는 호출부(화면)가 소유·전달한다 — 같은 화면의 UnconfirmedSettlementsBanner와
+ * 항상 같은 상태를 보게 하기 위함(각자 따로 훅을 부르면 한쪽에서 확인 처리해도
+ * 다른 쪽 배너 숫자가 갱신 안 되는 문제가 생긴다). 주기적 갱신(폴링)도 호출부 책임이다.
  */
-export function AutoSettlementReveal() {
+export function AutoSettlementReveal({ data, reload }: AutoSettlementRevealProps) {
   const { user } = useAuth();
-  const { data, reload } = useUnconfirmedSettlements();
   const [queue, setQueue] = useState<QueueItem[] | null>(null);
   const [index, setIndex] = useState(0);
   const [isConfirming, setIsConfirming] = useState(false);
-
-  /**
-   * 정산은 1분 주기 백그라운드 스케줄러(F-12)로도 일어난다. 홈 화면을 계속 보고 있는 동안
-   * 정산이 발생해도 팝업이 뜨도록 주기적으로 다시 확인한다(최초 마운트 시 1회 조회로는
-   * 이미 열려 있는 홈에서 새로 끝난 약속을 못 잡아냄).
-   */
-  usePolling(reload, 20000);
 
   useEffect(() => {
     if (!data || !user) return;

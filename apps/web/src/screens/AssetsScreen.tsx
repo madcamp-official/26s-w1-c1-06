@@ -15,6 +15,7 @@ import { useOptions } from "../hooks/useOptions";
 import { usePolling } from "../hooks/usePolling";
 import { useStockChart } from "../hooks/useStockChart";
 import { useStockPromises } from "../hooks/useStockPromises";
+import { useUnconfirmedSettlements } from "../hooks/useUnconfirmedSettlements";
 import { listFriends } from "../lib/endpoints";
 import { FALL_COLOR, RISE_COLOR } from "../theme";
 import type { FriendView } from "../types/api";
@@ -32,6 +33,7 @@ export function AssetsScreen() {
   const assets = useAssets();
   const openPositions = useOpenPositions();
   const options = useOptions();
+  const unconfirmed = useUnconfirmedSettlements();
   const { promises, isLoading: promisesLoading } = useStockPromises(selectedFriend?.userId);
 
   const chart = selectedFriend ? friendChart : ownChart;
@@ -58,6 +60,7 @@ export function AssetsScreen() {
     loadFriends();
     openPositions.reload();
   }, 25000);
+  usePolling(unconfirmed.reload, 20000);
 
   function handleSelectStock(friend: FriendView) {
     setSearchParams({ stock: friend.userId });
@@ -91,7 +94,7 @@ export function AssetsScreen() {
         )}
       </header>
 
-      <UnconfirmedSettlementsBanner />
+      <UnconfirmedSettlementsBanner data={unconfirmed.data} />
 
       <OpenPositionsPanel
         positions={openPositions.positions}
