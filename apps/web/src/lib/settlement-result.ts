@@ -4,7 +4,7 @@ import {
   type Verdict,
 } from "@latestock/shared";
 import { maskStockName } from "./masking";
-import type { ChartPoint, PositionView, PromiseView } from "../types/api";
+import type { UnconfirmedAsInvestor, UnconfirmedAsStock, ChartPoint, PositionView, PromiseView } from "../types/api";
 
 export type SettlementKind = "investor" | "stock";
 
@@ -58,7 +58,6 @@ function fromChartPoint(
   };
 }
 
-/** 조기 청산(M3-2) — 약속이 아직 판정 안 나서 차트 포인트가 없는 경우의 대체 표시. */
 function fromEarlyExit(
   position: PositionView,
 ): Pick<
@@ -71,6 +70,35 @@ function fromEarlyExit(
     memeLabel: "조기 청산 💰",
     memeBgKey: "EARLY_EXIT",
     settledPrice: position.priceAfter ?? position.openPrice,
+  };
+}
+
+/** 판정(verdict)으로 밈·등급을 결정 — 차트 포인트·미확인 정산 목록 공통. */
+function memeFromVerdict(
+  verdict: Verdict | null,
+  lateMinutes: number | null,
+  settledPrice: number,
+): Pick<
+  SettlementResultVM,
+  "verdict" | "lateMinutes" | "memeLabel" | "memeBgKey" | "settledPrice"
+> {
+  if (!verdict) {
+    return {
+      verdict: "early_exit",
+      lateMinutes: 0,
+      memeLabel: "조기 청산 💰",
+      memeBgKey: "EARLY_EXIT",
+      settledPrice,
+    };
+  }
+  const isNoShow = verdict === "no_show";
+  const mins = lateMinutes ?? 0;
+  return {
+    verdict,
+    lateMinutes: mins,
+    memeLabel: memeLabel(mins, isNoShow),
+    memeBgKey: memeLabelKey(mins, isNoShow),
+    settledPrice,
   };
 }
 
@@ -110,7 +138,7 @@ export function buildStockResult(
   viewerId: string,
   stockUserId: string,
 ): SettlementResultVM {
-  const meme = fromChartPoint(chartPoint);
+  const meme = memeFromVerdict(chartPoint.verdict, chartPoint.lateMinutes, chartPoint.settledPrice);
   return {
     kind: "stock",
     promiseId: promise.id,
@@ -119,6 +147,46 @@ export function buildStockResult(
     ...meme,
     stockUserId,
     stockDisplayName: maskStockName(stockNickname, viewerId, stockUserId),
+  };
+}
+
+/** M6-1: 미확인 정산(종목 본인) — 별도 조회 없이 목록에서 결과 VM으로 변환. */
+export function buildVMFromUnconfirmedStock(
+  item: UnconfirmedAsStock,
+  viewerNickname: string,
+  viewerId: string,
+): SettlementResultVM {
+  const meme = memeFromVerdict(item.verdict, item.lateMinutes, item.settledPrice);
+  return {
+    kind: "stock",
+    promiseId: item.promiseId,
+    promiseTitle: item.promiseTitle,
+    promisedAt: item.promisedAt,
+    ...meme,
+    stockUserId: viewerId,
+    stockDisplayName: maskStockName(viewerNickname, viewerId, viewerId),
+  };
+}
+
+/** M6-1: 미확인 정산(투자자) — 별도 조회 없이 목록에서 결과 VM으로 변환. */
+export function buildVMFromUnconfirmedInvestor(
+  item: UnconfirmedAsInvestor,
+  viewerId: string,
+): SettlementResultVM {
+  const meme = memeFromVerdict(item.verdict, item.lateMinutes, item.priceAfter);
+  return {
+    kind: "investor",
+    promiseId: item.promiseId,
+    promiseTitle: item.promiseTitle,
+    promisedAt: item.settledAt,
+    ...meme,
+    priceBefore: item.priceBefore,
+    priceAfter: item.priceAfter,
+    direction: item.direction,
+    payout: item.payout,
+    positionId: item.positionId,
+    stockUserId: item.stockUserId,
+    stockDisplayName: maskStockName(item.stockNickname, viewerId, item.stockUserId),
   };
 }
 

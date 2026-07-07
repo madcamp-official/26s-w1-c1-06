@@ -22,6 +22,8 @@ export interface UnconfirmedAsInvestor {
   priceBefore: number;
   priceAfter: number;
   settledAt: string;
+  verdict: Verdict | null;
+  lateMinutes: number | null;
 }
 
 export interface UnconfirmedSettlements {
@@ -50,6 +52,8 @@ interface AsInvestorRow {
   price_before: number;
   price_after: number;
   settled_at: Date;
+  verdict: Verdict | null;
+  late_minutes: number | null;
 }
 
 /**
@@ -75,10 +79,13 @@ export async function getUnconfirmedSettlements(
   const asInvestorResult = await pool.query<AsInvestorRow>(
     `SELECT p.id, p.promise_id, pr.title AS promise_title,
             p.stock_user_id, u.nickname AS stock_nickname,
-            p.direction, p.payout, p.price_before, p.price_after, p.settled_at
+            p.direction, p.payout, p.price_before, p.price_after, p.settled_at,
+            pp.verdict, pp.late_minutes
      FROM positions p
      JOIN promises pr ON pr.id = p.promise_id
      JOIN users u ON u.id = p.stock_user_id
+     LEFT JOIN promise_participants pp
+       ON pp.promise_id = p.promise_id AND pp.user_id = p.stock_user_id
      WHERE p.investor_id = $1 AND p.status = 'settled' AND p.confirmed_at IS NULL
      ORDER BY p.settled_at DESC`,
     [userId],
@@ -104,6 +111,8 @@ export async function getUnconfirmedSettlements(
     priceBefore: r.price_before,
     priceAfter: r.price_after,
     settledAt: r.settled_at.toISOString(),
+    verdict: r.verdict,
+    lateMinutes: r.late_minutes,
   }));
 
   return {

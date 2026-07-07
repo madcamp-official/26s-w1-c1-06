@@ -421,6 +421,68 @@ export async function closePosition(
   }
 }
 
+export interface BettorSummary {
+  buyCount: number;
+  shortCount: number;
+  buyQuantity: number;
+  shortQuantity: number;
+}
+
+/** GET /stocks/:userId/promises/:promiseId/bettors — 베팅 현황 공개 (M6-5). */
+export async function getBettorSummary(
+  viewerId: string,
+  stockUserId: string,
+  promiseId: string,
+): Promise<BettorSummary> {
+  const pool = getPool();
+  requirePool(pool);
+
+  if (viewerId !== stockUserId) {
+    const isFriend = await isAcceptedFriend(pool, viewerId, stockUserId);
+    if (!isFriend) {
+      throw new HttpError(403, "친구의 종목의 베팅 현황만 조회할 수 있습니다.");
+    }
+  }
+
+  const participant = await pool.query(
+    `SELECT 1 FROM promise_participants WHERE promise_id = $1 AND user_id = $2`,
+    [promiseId, stockUserId],
+  );
+  if ((participant.rowCount ?? 0) === 0) {
+    throw new HttpError(404, "해당 종목이 이 약속의 참여자가 아닙니다.");
+  }
+
+  const result = await pool.query<{
+    direction: PositionDirection;
+    bettor_count: string;
+    total_quantity: string;
+  }>(
+    `SELECT direction, COUNT(*)::text AS bettor_count,
+            COALESCE(SUM(quantity), 0)::text AS total_quantity
+     FROM positions
+     WHERE stock_user_id = $1 AND promise_id = $2
+     GROUP BY direction`,
+    [stockUserId, promiseId],
+  );
+
+  const summary: BettorSummary = {
+    buyCount: 0,
+    shortCount: 0,
+    buyQuantity: 0,
+    shortQuantity: 0,
+  };
+  for (const row of result.rows) {
+    if (row.direction === "buy") {
+      summary.buyCount = Number(row.bettor_count);
+      summary.buyQuantity = Number(row.total_quantity);
+    } else {
+      summary.shortCount = Number(row.bettor_count);
+      summary.shortQuantity = Number(row.total_quantity);
+    }
+  }
+  return summary;
+}
+
 /** GET /positions — 내 포지션 목록. */
 export async function listPositions(
   investorId: string,

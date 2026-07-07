@@ -109,12 +109,35 @@ export interface UnconfirmedAsInvestor {
   priceBefore: number;
   priceAfter: number;
   settledAt: string;
+  /** 조기 청산(M3-2) 등 약속 판정이 없으면 null. */
+  verdict: Verdict | null;
+  lateMinutes: number | null;
 }
 
 export interface UnconfirmedSettlements {
   asStock: UnconfirmedAsStock[];
   asInvestor: UnconfirmedAsInvestor[];
   totalCount: number;
+}
+
+export interface BettorSummary {
+  buyCount: number;
+  shortCount: number;
+  buyQuantity: number;
+  shortQuantity: number;
+}
+
+/** M6-6: 친구 소식 피드 — 나·친구의 최근 정산 소식. */
+export interface FriendActivityItem {
+  promiseId: string;
+  promiseTitle: string;
+  stockUserId: string;
+  stockNickname: string;
+  verdict: Verdict;
+  lateMinutes: number;
+  settledPrice: number;
+  settledAt: string;
+  reactionCount: number;
 }
 
 /** GET /promises/:id/participants 참여자 1행 (F-05/F-06/F-19, R-1/R-5 마스킹 적용됨). */
