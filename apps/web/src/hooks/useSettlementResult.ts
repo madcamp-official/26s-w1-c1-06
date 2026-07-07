@@ -50,10 +50,10 @@ export function useSettlementResult({
             throw new Error("정산된 포지션을 찾을 수 없습니다.");
           }
           const { points } = await getStockChart(position.stockUserId);
-          const chartPoint = points.find((p) => p.promiseId === position.promiseId);
-          if (!chartPoint) {
-            throw new Error("차트 데이터를 찾을 수 없습니다.");
-          }
+          // 조기 청산(M3-2)된 포지션은 약속이 아직 판정 안 나서 차트 포인트가 없을 수 있다 —
+          // 이 경우 에러 대신 포지션 자체 데이터로 결과를 구성한다(fromEarlyExit).
+          const chartPoint =
+            points.find((p) => p.promiseId === position.promiseId) ?? null;
           const vm = buildInvestorResult(position, chartPoint, viewerId);
           if (!cancelled) setData(vm);
           confirmKind = "position";

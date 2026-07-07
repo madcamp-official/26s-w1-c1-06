@@ -180,6 +180,21 @@ export function StockCandlestickChart({
           );
         })}
 
+        {candles.length > 1 && (
+          <polyline
+            points={candles
+              .map((c, i) => {
+                const cx = padding.left + slotW * i + slotW / 2;
+                return `${cx},${yScale(c.close)}`;
+              })
+              .join(" ")}
+            fill="none"
+            stroke="#fee500"
+            strokeWidth={1.5}
+            strokeOpacity={0.7}
+          />
+        )}
+
         {candles.map((c, i) => {
           const cx = padding.left + slotW * i + slotW / 2;
           const color = c.isUp ? RISE_COLOR : FALL_COLOR;

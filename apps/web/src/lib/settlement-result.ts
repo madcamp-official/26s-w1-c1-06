@@ -13,10 +13,11 @@ export interface SettlementResultVM {
   promiseId: string;
   promiseTitle: string;
   promisedAt: string;
-  verdict: Verdict;
+  /** "early_exit" = 약속 판정을 기다리지 않고 조기 청산(M3-2)한 경우, 판정 등급 없음. */
+  verdict: Verdict | "early_exit";
   lateMinutes: number;
   memeLabel: string;
-  memeBgKey: keyof typeof MEME_LABELS;
+  memeBgKey: keyof typeof MEME_LABELS | "EARLY_EXIT";
   settledPrice: number;
   priceBefore?: number;
   priceAfter?: number;
@@ -42,7 +43,6 @@ export function memeLabelKey(
 
 function fromChartPoint(
   point: ChartPoint,
-  promiseTitle: string,
 ): Pick<
   SettlementResultVM,
   "verdict" | "lateMinutes" | "memeLabel" | "memeBgKey" | "settledPrice"
@@ -58,12 +58,28 @@ function fromChartPoint(
   };
 }
 
+/** 조기 청산(M3-2) — 약속이 아직 판정 안 나서 차트 포인트가 없는 경우의 대체 표시. */
+function fromEarlyExit(
+  position: PositionView,
+): Pick<
+  SettlementResultVM,
+  "verdict" | "lateMinutes" | "memeLabel" | "memeBgKey" | "settledPrice"
+> {
+  return {
+    verdict: "early_exit",
+    lateMinutes: 0,
+    memeLabel: "조기 청산 💰",
+    memeBgKey: "EARLY_EXIT",
+    settledPrice: position.priceAfter ?? position.openPrice,
+  };
+}
+
 export function buildInvestorResult(
   position: PositionView,
-  chartPoint: ChartPoint,
+  chartPoint: ChartPoint | null,
   viewerId: string,
 ): SettlementResultVM {
-  const meme = fromChartPoint(chartPoint, position.promiseTitle);
+  const meme = chartPoint ? fromChartPoint(chartPoint) : fromEarlyExit(position);
   const vm: SettlementResultVM = {
     kind: "investor",
     promiseId: position.promiseId,
@@ -94,7 +110,7 @@ export function buildStockResult(
   viewerId: string,
   stockUserId: string,
 ): SettlementResultVM {
-  const meme = fromChartPoint(chartPoint, promise.title);
+  const meme = fromChartPoint(chartPoint);
   return {
     kind: "stock",
     promiseId: promise.id,
