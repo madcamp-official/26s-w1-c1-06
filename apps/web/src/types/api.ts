@@ -37,6 +37,34 @@ export interface OptionPositionView {
   settledAt: string | null;
 }
 
+/** ETF 바스켓 (S-03) — legs는 기존 PositionView 그대로, etf_order_id로 묶인 것만 다름. */
+export interface EtfBasketView {
+  id: string;
+  label: string;
+  themeKey: string | null;
+  direction: PositionDirection;
+  legs: PositionView[];
+  totalLocked: number;
+  realizedPayout: number;
+  isFullySettled: boolean;
+  createdAt: string;
+}
+
+export interface EtfRecommendationLeg {
+  stockUserId: string;
+  stockNickname: string;
+  promiseId: string;
+  promiseTitle: string;
+}
+
+export interface EtfRecommendationView {
+  themeKey: string;
+  name: string;
+  emoji: string;
+  direction: PositionDirection;
+  legs: EtfRecommendationLeg[];
+}
+
 export interface ChartPoint {
   promiseId: string;
   promisedAt: string;

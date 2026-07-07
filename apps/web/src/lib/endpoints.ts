@@ -5,6 +5,8 @@ import type {
   BettorSummary,
   ChartPoint,
   DemoSettleResult,
+  EtfBasketView,
+  EtfRecommendationView,
   FriendActivityItem,
   FriendView,
   OptionPositionView,
@@ -103,6 +105,30 @@ export function buyOption(body: {
   quantity: number;
 }) {
   return apiFetch<{ option: OptionPositionView }>("/api/options", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function getEtfRecommendations() {
+  return apiFetch<{ recommendations: EtfRecommendationView[] }>(
+    "/api/etf/recommendations",
+  );
+}
+
+export function listEtfBaskets(status?: "open" | "settled") {
+  const q = status ? `?status=${status}` : "";
+  return apiFetch<{ baskets: EtfBasketView[] }>(`/api/etf/baskets${q}`);
+}
+
+export function openEtfBasket(body: {
+  direction: "buy" | "short";
+  quantity: number;
+  label?: string;
+  themeKey?: string;
+  legs: { stockUserId: string; promiseId: string }[];
+}) {
+  return apiFetch<{ basket: EtfBasketView }>("/api/etf/baskets", {
     method: "POST",
     body: JSON.stringify(body),
   });

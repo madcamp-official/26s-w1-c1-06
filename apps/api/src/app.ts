@@ -14,6 +14,7 @@ import { assetsRouter } from "./routes/assets.js";
 import { meStockRouter, stocksRouter } from "./routes/stock-chart.js";
 import { settlementInboxRouter } from "./routes/settlement-inbox.js";
 import { optionsRouter } from "./routes/options.js";
+import { etfRouter } from "./routes/etf.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -58,6 +59,9 @@ export function createApp(): express.Express {
 
   // S-04 옵션 거래(콜/풋)
   app.use("/api/options", optionsRouter);
+
+  // S-03 ETF 바스켓 (추천/직접 만들기 공용)
+  app.use("/api/etf", etfRouter);
 
   // M1.2-3 자산 화면 — 가용/잠금 포인트, 원장 (F-14 일부)
   app.use("/api/me", assetsRouter);

@@ -514,6 +514,7 @@ export async function listPositions(
      JOIN users u ON u.id = p.stock_user_id
      JOIN promises pr ON pr.id = p.promise_id
      WHERE p.investor_id = $1::bigint
+       AND p.etf_order_id IS NULL
        ${statusClause}
        ${idClause}
      ORDER BY p.created_at DESC`,

@@ -2377,6 +2377,58 @@ select {
   border-color: var(--kakao-yellow);
 }
 
+.open-positions__item--basket {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.etf-basket__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.etf-basket__legs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid #1e1e1e;
+  padding-top: 8px;
+}
+
+.etf-basket__leg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: #999;
+}
+
+.etf-basket__leg-name {
+  font-weight: 700;
+  color: #ddd;
+  flex-shrink: 0;
+}
+
+.etf-basket__leg-promise {
+  color: #777;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.etf-basket__leg-status {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .trade-ranking {
   padding: 16px 24px 24px;
   background: #141414;
@@ -2983,4 +3035,100 @@ select {
 
 .modal-box--result .btn {
   margin-top: 8px;
+}
+
+.modal-box--etf-builder {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.etf-builder__friends {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.etf-builder__friend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--kakao-gray-300, #ddd);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.etf-builder__legs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---- 추천 ETF (S-03) ---- */
+
+.etf-recommend {
+  padding: 16px 24px;
+  background: #141414;
+  border-top: 1px solid #222;
+}
+
+.etf-recommend__header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.etf-recommend__hint {
+  margin: 2px 0 12px;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.etf-recommend__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.etf-recommend-card {
+  flex: 1 1 240px;
+  min-width: 220px;
+  background: #1c1c1c;
+  border: 1px solid #262626;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.etf-recommend-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.etf-recommend-card__emoji {
+  font-size: 1.6rem;
+}
+
+.etf-recommend-card__header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.etf-recommend-card__members {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: #999;
+}
+
+.etf-recommend-card__note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #777;
 }
