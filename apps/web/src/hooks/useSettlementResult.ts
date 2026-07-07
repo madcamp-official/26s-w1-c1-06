@@ -92,7 +92,8 @@ export function useSettlementResult({
         if (!cancelled) setLoading(false);
       }
 
-      // confirm은 부가 효과 — 조회 성공 후 베스트 에포트 (에러가 UI를 덮지 않음)
+      // confirm은 결과 조회 성공 후의 부가 효과 — try 밖에서 호출해 로딩 해제가
+      // confirm 왕복을 기다리지 않게 하고, 언마운트된 뒤에는 발사하지 않는다.
       if (!cancelled && confirmKind && confirmRefId) {
         await confirmSettlement(confirmKind, confirmRefId);
       }

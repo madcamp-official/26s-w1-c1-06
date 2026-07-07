@@ -53,3 +53,31 @@ export interface DemoSettleResult {
   skippedIds: number[];
   failedIds: number[];
 }
+
+export interface UnconfirmedAsStock {
+  promiseId: string;
+  promiseTitle: string;
+  promisedAt: string;
+  verdict: Verdict;
+  lateMinutes: number;
+  settledPrice: number;
+}
+
+export interface UnconfirmedAsInvestor {
+  positionId: string;
+  promiseId: string;
+  promiseTitle: string;
+  stockUserId: string;
+  stockNickname: string;
+  direction: PositionDirection;
+  payout: number;
+  priceBefore: number;
+  priceAfter: number;
+  settledAt: string;
+}
+
+export interface UnconfirmedSettlements {
+  asStock: UnconfirmedAsStock[];
+  asInvestor: UnconfirmedAsInvestor[];
+  totalCount: number;
+}

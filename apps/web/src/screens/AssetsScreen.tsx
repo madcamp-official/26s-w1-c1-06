@@ -5,6 +5,7 @@ import { AsyncState } from "../components/AsyncState";
 import { StockCandlestickChart } from "../components/StockCandlestickChart";
 import { OrderPanel } from "../components/trade/OrderPanel";
 import { StockRankingTable } from "../components/trade/StockRankingTable";
+import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAssets } from "../hooks/useAssets";
 import { useStockChart } from "../hooks/useStockChart";
 import { useUpcomingPromises } from "../hooks/useUpcomingPromises";
@@ -96,6 +97,8 @@ export function AssetsScreen() {
           </div>
         )}
       </header>
+
+      <UnconfirmedSettlementsBanner />
 
       <AsyncState
         loading={assets.isLoading && ownChart.isLoading}

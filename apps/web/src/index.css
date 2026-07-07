@@ -561,6 +561,24 @@ select {
   color: var(--kakao-gray-500);
 }
 
+/* Unconfirmed settlements banner */
+.settlement-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--kakao-yellow);
+  color: var(--kakao-gray-900);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.settlement-banner__text {
+  flex: 1;
+}
+
 /* Home card */
 .home-card {
   background: #fff;
