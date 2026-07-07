@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getUnconfirmedSettlements } from "../lib/endpoints";
 import type { UnconfirmedSettlements } from "../types/api";
 
@@ -6,6 +6,7 @@ interface UseUnconfirmedSettlementsResult {
   data: UnconfirmedSettlements | null;
   isLoading: boolean;
   error: string | null;
+  reload: () => void;
 }
 
 /** GET /me/unconfirmed-settlements — 미확인 정산 배너 데이터 (F-12). */
@@ -14,30 +15,25 @@ export function useUnconfirmedSettlements(): UseUnconfirmedSettlementsResult {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const reload = useCallback(() => {
     setIsLoading(true);
     setError(null);
 
     getUnconfirmedSettlements()
       .then((result) => {
-        if (!cancelled) setData(result);
+        setData(result);
       })
       .catch((err) => {
-        if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : "미확인 정산 정보를 불러오지 못했습니다.",
-          );
-        }
+        setError(err instanceof Error ? err.message : "미확인 정산 정보를 불러오지 못했습니다.");
       })
       .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        setIsLoading(false);
       });
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
-  return { data, isLoading, error };
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  return { data, isLoading, error, reload };
 }

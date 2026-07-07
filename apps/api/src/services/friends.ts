@@ -1,4 +1,5 @@
 import type pg from "pg";
+import type { Verdict } from "@latestock/shared";
 import { getPool } from "../db/pool.js";
 import { HttpError, requirePool } from "../lib/errors.js";
 
@@ -247,6 +248,78 @@ export async function getFriendRanking(userId: string): Promise<RankingEntryView
       returnPct: r.total_locked === 0 ? 0 : (r.total_payout / r.total_locked) * 100,
     }))
     .sort((a, b) => b.returnPct - a.returnPct);
+}
+
+export interface FriendActivityItem {
+  promiseId: string;
+  promiseTitle: string;
+  stockUserId: string;
+  stockNickname: string;
+  verdict: Verdict;
+  lateMinutes: number;
+  settledPrice: number;
+  settledAt: string;
+  reactionCount: number;
+}
+
+/**
+ * GET /friends/activity-feed (M6-6) — 나 자신과 친구들의 최근 정산 소식.
+ * 이미 친구 사이라 신원을 감출 이유가 없어 실제 닉네임을 그대로 노출한다
+ * (settlement-result.ts의 maskStockName은 결과 공유 카드 전용 마스킹으로 별개).
+ */
+export async function getFriendActivityFeed(
+  userId: string,
+  limit = 20,
+): Promise<FriendActivityItem[]> {
+  const pool = getPool();
+  requirePool(pool);
+
+  const result = await pool.query<{
+    promise_id: string;
+    promise_title: string;
+    stock_user_id: string;
+    nickname: string;
+    verdict: Verdict;
+    late_minutes: number;
+    settled_price: number;
+    settled_at: Date;
+    reaction_count: string;
+  }>(
+    `SELECT pp.promise_id, p.title AS promise_title, pp.user_id AS stock_user_id,
+            u.nickname, pp.verdict, pp.late_minutes, pp.settled_price, p.settled_at,
+            (SELECT COUNT(*) FROM reactions r WHERE r.promise_id = pp.promise_id)::text
+              AS reaction_count
+     FROM promise_participants pp
+     JOIN promises p ON p.id = pp.promise_id
+     JOIN users u ON u.id = pp.user_id
+     WHERE pp.verdict IS NOT NULL
+       AND (
+         pp.user_id = $1::bigint
+         OR EXISTS (
+           SELECT 1 FROM friendships f
+           WHERE f.status = 'accepted'
+             AND (
+               (f.requester_id = pp.user_id AND f.addressee_id = $1::bigint)
+               OR (f.requester_id = $1::bigint AND f.addressee_id = pp.user_id)
+             )
+         )
+       )
+     ORDER BY p.settled_at DESC
+     LIMIT $2`,
+    [userId, limit],
+  );
+
+  return result.rows.map((r) => ({
+    promiseId: r.promise_id,
+    promiseTitle: r.promise_title,
+    stockUserId: r.stock_user_id,
+    stockNickname: r.nickname,
+    verdict: r.verdict,
+    lateMinutes: r.late_minutes,
+    settledPrice: r.settled_price,
+    settledAt: r.settled_at.toISOString(),
+    reactionCount: Number(r.reaction_count),
+  }));
 }
 
 /** GET /users/search?q= */

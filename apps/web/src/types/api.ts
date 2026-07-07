@@ -52,6 +52,27 @@ export interface BettablePromiseView {
   promisedAt: string;
 }
 
+/** M6-5: 베팅 현황 공개 — 개별 투자자 신원은 감추고 매수/공매도 합계만 노출. */
+export interface BettorSummary {
+  buyCount: number;
+  shortCount: number;
+  buyQuantity: number;
+  shortQuantity: number;
+}
+
+/** M6-6: 친구 소식 피드 — 나·친구의 최근 정산 소식. */
+export interface FriendActivityItem {
+  promiseId: string;
+  promiseTitle: string;
+  stockUserId: string;
+  stockNickname: string;
+  verdict: Verdict;
+  lateMinutes: number;
+  settledPrice: number;
+  settledAt: string;
+  reactionCount: number;
+}
+
 export interface PromiseView {
   id: string;
   creatorId: string;
@@ -109,6 +130,9 @@ export interface UnconfirmedAsInvestor {
   priceBefore: number;
   priceAfter: number;
   settledAt: string;
+  /** 조기 청산(M3-2)된 포지션은 약속이 판정 안 나서 둘 다 null. */
+  verdict: Verdict | null;
+  lateMinutes: number | null;
 }
 
 export interface UnconfirmedSettlements {
