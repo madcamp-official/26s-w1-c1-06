@@ -3,6 +3,7 @@ export * from "./types.js";
 export * from "./payout.js";
 export * from "./pricing.js";
 export * from "./position-preview.js";
+export * from "./etf.js";
 export * from "./guards/betting.js";
 export * from "./guards/masking.js";
 export * from "./guards/location.js";
