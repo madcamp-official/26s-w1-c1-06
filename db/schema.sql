@@ -132,6 +132,26 @@ CREATE INDEX idx_pos_my      ON positions (investor_id, status);                
 CREATE INDEX idx_pos_unconfirmed ON positions (investor_id)                                  -- 투자자 미확인 배너 카운트
     WHERE status = 'settled' AND confirmed_at IS NULL;
 
+-- ---------- etf_orders : ETF 바스켓 헤더 (S-03) ----------
+-- 바스켓의 실제 베팅 내용은 별도로 저장하지 않는다 — 아래 positions.etf_order_id로
+-- 태깅된 평범한 positions 행(leg)들이 곧 베팅 내용이다. 이 테이블은 표시용 헤더(이름·테마)만 담당.
+-- 정산은 각 leg가 걸린 약속이 정산될 때 기존 정산 엔진(T2)이 그대로 처리 — 바스켓 전용 정산 로직 없음.
+CREATE TABLE etf_orders (
+    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    investor_id  BIGINT NOT NULL REFERENCES users(id),
+    label        VARCHAR(40) NOT NULL,   -- "노답 3형제"(추천) 또는 사용자 지정 이름(직접 만들기)
+    theme_key    VARCHAR(40),            -- 추천 테마에서 만들어졌으면 규칙 key, 직접 만들기는 NULL
+    direction    position_dir NOT NULL,  -- 바스켓 전체 단일 방향(D1 준용). positions.direction과 항상 동일(조회 편의 목적 중복 저장)
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_etf_orders_investor ON etf_orders (investor_id, created_at DESC); -- 자산 화면 바스켓 목록(SC-15/17)
+
+-- positions는 etf_orders보다 먼저 정의되어 있어 CREATE TABLE 안에서 바로 참조할 수 없으므로 ALTER로 추가.
+-- NULL = 바스켓에 속하지 않은 일반 포지션(F-10/F-11). 이 컬럼 하나로 바스켓의 leg를 그룹핑하며,
+-- 정산 로직(T2)은 이 컬럼의 존재를 전혀 모른 채 지금과 동일하게 동작한다(설계상 핵심).
+ALTER TABLE positions ADD COLUMN etf_order_id BIGINT REFERENCES etf_orders(id);
+CREATE INDEX idx_pos_etf ON positions (etf_order_id) WHERE etf_order_id IS NOT NULL; -- 바스켓별 leg 조회
+
 -- ---------- self_stock_options : F-17 특별매수 권한 ----------
 CREATE TABLE self_stock_options (
     id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

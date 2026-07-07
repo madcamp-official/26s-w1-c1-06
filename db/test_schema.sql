@@ -89,6 +89,75 @@ UPDATE self_stock_lots SET sold_price=6800, sold_at=now() WHERE user_id=1;
 \echo '===== [위반 13] 가용 포인트 음수 → CHECK 거부 ====='
 UPDATE users SET available_points = -1 WHERE id=1;
 
+\echo '===== [ETF 정상 흐름] 바스켓 헤더 + leg 3개 — positions를 그대로 재사용 (S-03) ====='
+BEGIN;
+INSERT INTO users (email, nickname, available_points) VALUES ('c@t.com','민수',100000), ('d@t.com','지훈',100000);
+INSERT INTO point_transactions (user_id, amount, tx_type) VALUES (3,100000,'signup_grant'),(4,100000,'signup_grant');
+INSERT INTO friendships (requester_id, addressee_id, status, responded_at) VALUES (1,3,'accepted',now()),(1,4,'accepted',now());
+-- 약속 3=스터디(민수), 4=축구(지훈), 5=저녁2(영희 — 기존 약속1은 이미 정산되어 재사용 불가)
+INSERT INTO promises (creator_id,title,place_name,latitude,longitude,promised_at,settle_due_at) VALUES
+  (1,'스터디','강남역',37.49,127.02, now()+interval '1 hour', now()+interval '2 hour'),
+  (1,'축구','잠실',37.51,127.10, now()+interval '1 hour', now()+interval '2 hour'),
+  (1,'저녁2','강남역',37.49,127.02, now()+interval '1 hour', now()+interval '2 hour');
+INSERT INTO promise_participants (promise_id,user_id,invite_status,responded_at) VALUES
+  (3,1,'accepted',now()),(3,3,'accepted',now()),
+  (4,1,'accepted',now()),(4,4,'accepted',now()),
+  (5,1,'accepted',now()),(5,2,'accepted',now());
+
+INSERT INTO etf_orders (investor_id, label, theme_key, direction) VALUES (1,'시한폭탄 트리오','risky-3-mid','short');
+-- 철수가 영희(약속5)·민수(약속3)·지훈(약속4)을 한 바스켓으로 공매도 3주(각 2주)
+INSERT INTO positions (investor_id,stock_user_id,promise_id,direction,quantity,open_price,locked_points,etf_order_id) VALUES
+  (1,2,5,'short',2,6800, 13600, (SELECT id FROM etf_orders WHERE label='시한폭탄 트리오')),
+  (1,3,3,'short',2,10000,20000, (SELECT id FROM etf_orders WHERE label='시한폭탄 트리오')),
+  (1,4,4,'short',2,10000,20000, (SELECT id FROM etf_orders WHERE label='시한폭탄 트리오'));
+INSERT INTO point_transactions (user_id, amount, tx_type, ref_id)
+  SELECT 1, -locked_points, 'position_lock', id FROM positions WHERE etf_order_id IS NOT NULL;
+UPDATE users SET available_points = available_points - 53600 WHERE id=1; -- 13600+20000+20000
+COMMIT;
+SELECT 'OK: ETF 바스켓 개설(3-leg, 잠금 53,600)' AS result;
+
+\echo '===== [검증] 바스켓별 leg 조회 (idx_pos_etf, 자산/자산-바스켓 화면 재현) ====='
+SELECT eo.label, u.nickname AS stock_nickname, p.locked_points, p.status
+FROM positions p
+JOIN etf_orders eo ON eo.id = p.etf_order_id
+JOIN users u ON u.id = p.stock_user_id
+ORDER BY eo.id, p.stock_user_id;
+
+\echo '===== [위반 14] ETF leg도 자기주식 금지(P-5)가 그대로 적용 → CHECK 거부 ====='
+INSERT INTO positions (investor_id,stock_user_id,promise_id,direction,quantity,open_price,locked_points,etf_order_id)
+  VALUES (1,1,3,'short',1,10000,10000,(SELECT id FROM etf_orders WHERE label='시한폭탄 트리오'));
+
+\echo '===== [위반 15] ETF leg도 동일(투자자,종목,약속) 중복 금지(D6)가 그대로 적용 → UNIQUE 거부 ====='
+INSERT INTO positions (investor_id,stock_user_id,promise_id,direction,quantity,open_price,locked_points,etf_order_id)
+  VALUES (1,3,3,'buy',1,10000,10000,(SELECT id FROM etf_orders WHERE label='시한폭탄 트리오'));
+
+\echo '===== [위반 16] 존재하지 않는 etf_order_id 참조 → FK 거부 ====='
+INSERT INTO positions (investor_id,stock_user_id,promise_id,direction,quantity,open_price,locked_points,etf_order_id)
+  VALUES (1,3,4,'short',1,10000,10000,999999);
+
+\echo '===== [ETF 정산] 영희(약속5) leg만 개별 정산 — 나머지 2건은 open으로 남는다(부분 정산) ====='
+BEGIN;
+UPDATE promise_participants SET checkin_at=now(), verdict='late', late_minutes=25, settled_price=5100 WHERE promise_id=5 AND user_id=2;
+UPDATE users SET current_price=5100 WHERE id=2;
+UPDATE positions SET status='settled', price_before=6800, price_after=5100, payout=2*(6800-5100), settled_at=now()
+  WHERE investor_id=1 AND stock_user_id=2 AND promise_id=5;
+INSERT INTO point_transactions (user_id,amount,tx_type,ref_id)
+  SELECT 1, locked_points, 'position_unlock', id FROM positions WHERE investor_id=1 AND stock_user_id=2 AND promise_id=5
+  UNION ALL
+  SELECT 1, payout, 'position_payout', id FROM positions WHERE investor_id=1 AND stock_user_id=2 AND promise_id=5;
+UPDATE users SET available_points = available_points + 13600 + 3400 WHERE id=1;
+UPDATE promises SET settled_at=now() WHERE id=5;
+COMMIT;
+SELECT 'OK: ETF 바스켓 부분 정산(영희 leg만 +3,400, 민수·지훈 leg는 여전히 open)' AS result;
+
+SELECT eo.label,
+       count(*) FILTER (WHERE p.status = 'open')    AS legs_open,
+       count(*) FILTER (WHERE p.status = 'settled') AS legs_settled,
+       COALESCE(sum(p.payout) FILTER (WHERE p.status = 'settled'), 0) AS realized_payout
+FROM positions p JOIN etf_orders eo ON eo.id = p.etf_order_id
+WHERE eo.label = '시한폭탄 트리오'
+GROUP BY eo.label;
+
 \echo '===== [검증] 원장 합계 = 잔액 불변식 ====='
 SELECT u.id, u.nickname, u.available_points AS balance, COALESCE(SUM(t.amount),0) AS ledger_sum,
        (u.available_points = COALESCE(SUM(t.amount),0)) AS invariant_ok
