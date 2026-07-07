@@ -1,5 +1,6 @@
 import {
   canCheckin,
+  haversineMeters,
   maskParticipants,
   NO_SHOW_MINUTES,
   type InviteStatus,
@@ -462,7 +463,13 @@ export async function checkinToPromise(
       if (guard.reason === "out_of_window") {
         throw new HttpError(409, "인증 가능 시간이 아닙니다.");
       }
-      throw new HttpError(400, "약속 장소 반경(50m) 밖입니다.");
+      const distanceMeters = haversineMeters(
+        { lat: promise.latitude, lng: promise.longitude },
+        { lat: latitude, lng: longitude },
+      );
+      throw new HttpError(400, "약속 장소 반경(50m) 밖입니다.", {
+        distanceMeters: Math.round(distanceMeters),
+      });
     }
 
     const updated = await client.query<{ checkin_at: Date }>(

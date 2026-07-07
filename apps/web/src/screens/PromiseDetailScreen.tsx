@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { CustomOverlayMap, Map, MapMarker } from "react-kakao-maps-sdk";
 import { AsyncState } from "../components/AsyncState";
+import { CheckinResultModal, type CheckinResultVariant } from "../components/CheckinResultModal";
 import { ParticipantResultModal } from "../components/ParticipantResultModal";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../lib/api";
@@ -42,6 +43,10 @@ export function PromiseDetailScreen() {
 
   const [checkinBusy, setCheckinBusy] = useState(false);
   const [checkinError, setCheckinError] = useState<string | null>(null);
+  const [checkinResult, setCheckinResult] = useState<{
+    variant: CheckinResultVariant;
+    distanceMeters?: number;
+  } | null>(null);
 
   /**
    * 최초 로드 실패와, 최초 로드 이후 8초 폴링 실패를 구분한다.
@@ -100,10 +105,22 @@ export function PromiseDetailScreen() {
       const { latitude, longitude } = await getCurrentPosition();
       await checkinPromise(id, latitude, longitude);
       await load();
+      setCheckinResult({ variant: "success" });
     } catch (err) {
-      if (err instanceof GeolocationError) setCheckinError(err.message);
-      else if (err instanceof ApiError) setCheckinError(err.message);
-      else setCheckinError("GPS 인증에 실패했습니다.");
+      const distanceMeters =
+        err instanceof ApiError && typeof err.details?.distanceMeters === "number"
+          ? err.details.distanceMeters
+          : undefined;
+
+      if (distanceMeters !== undefined) {
+        setCheckinResult({ variant: "out_of_radius", distanceMeters });
+      } else if (err instanceof GeolocationError) {
+        setCheckinError(err.message);
+      } else if (err instanceof ApiError) {
+        setCheckinError(err.message);
+      } else {
+        setCheckinError("GPS 인증에 실패했습니다.");
+      }
     } finally {
       setCheckinBusy(false);
     }
@@ -189,6 +206,14 @@ export function PromiseDetailScreen() {
           participant={selectedParticipant}
           viewerId={user.id}
           onClose={() => setSelectedParticipant(null)}
+        />
+      )}
+
+      {checkinResult && (
+        <CheckinResultModal
+          variant={checkinResult.variant}
+          distanceMeters={checkinResult.distanceMeters}
+          onClose={() => setCheckinResult(null)}
         />
       )}
     </div>

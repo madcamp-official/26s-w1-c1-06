@@ -7,6 +7,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public details?: Record<string, unknown>,
   ) {
     super(message);
   }
@@ -39,7 +40,7 @@ export async function apiFetch<T>(
 
   const body = await res.json().catch(() => null);
   if (!res.ok) {
-    throw new ApiError(res.status, body?.error ?? "요청에 실패했습니다.");
+    throw new ApiError(res.status, body?.error ?? "요청에 실패했습니다.", body ?? undefined);
   }
   return body as T;
 }

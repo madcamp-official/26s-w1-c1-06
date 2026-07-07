@@ -12,7 +12,7 @@ export function asyncHandler(fn: AsyncHandler) {
   return (req: Request, res: Response, next: NextFunction): void => {
     void fn(req, res, next).catch((err: unknown) => {
       if (err instanceof HttpError) {
-        res.status(err.status).json({ error: err.message });
+        res.status(err.status).json({ ...err.details, error: err.message });
         return;
       }
       next(err);
