@@ -36,6 +36,7 @@ CREATE TABLE users (
     current_price     INT NOT NULL DEFAULT 10000 CHECK (current_price > 0),  -- F-07 종목 현재가(최근 정산가), 0원 방지
     ewma_late_p       REAL NOT NULL DEFAULT 0.5 CHECK (ewma_late_p BETWEEN 0 AND 1), -- L-01 (α=0.25, p0=0.5). 정산 배치가 갱신
     on_time_streak    INT  NOT NULL DEFAULT 0 CHECK (on_time_streak >= 0),   -- [2차 S-01/I-4] 연속 정시 카운트
+    auto_accept_invites BOOLEAN NOT NULL DEFAULT false,        -- 데모/시드용 가상 계정 전용. 실제 유저는 항상 false(F-19 수동 응답 유지)
     created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
     CHECK (provider = 'email' OR provider_id IS NOT NULL)    -- 소셜 계정은 provider_id 필수
 );

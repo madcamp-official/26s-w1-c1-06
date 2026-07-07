@@ -270,11 +270,27 @@ export async function createPromise(
     );
 
     for (const inviteId of uniqueInvites) {
-      await client.query(
-        `INSERT INTO promise_participants (promise_id, user_id, invite_status)
-         VALUES ($1, $2, 'invited')`,
-        [promiseId, inviteId],
+      // 데모/시드용 가상 계정(auto_accept_invites)은 응답을 대신해 줄 실제 사람이 없으므로
+      // 초대와 동시에 자동 수락 처리한다. 실제 유저는 항상 false라 F-19 수동 응답 그대로다.
+      const invitee = await client.query<{ auto_accept_invites: boolean }>(
+        `SELECT auto_accept_invites FROM users WHERE id = $1`,
+        [inviteId],
       );
+      const autoAccept = invitee.rows[0]?.auto_accept_invites ?? false;
+
+      if (autoAccept) {
+        await client.query(
+          `INSERT INTO promise_participants (promise_id, user_id, invite_status, responded_at)
+           VALUES ($1, $2, 'accepted', now())`,
+          [promiseId, inviteId],
+        );
+      } else {
+        await client.query(
+          `INSERT INTO promise_participants (promise_id, user_id, invite_status)
+           VALUES ($1, $2, 'invited')`,
+          [promiseId, inviteId],
+        );
+      }
     }
 
     await client.query("COMMIT");

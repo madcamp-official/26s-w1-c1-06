@@ -3,9 +3,14 @@ import { MarketSummaryCard } from "../components/MarketSummaryCard";
 import { RankingCard } from "../components/RankingCard";
 import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAuth } from "../context/AuthContext";
+import { useAssets } from "../hooks/useAssets";
+import { usePolling } from "../hooks/usePolling";
 
 export function HomeScreen() {
   const { user, logout } = useAuth();
+  const assets = useAssets();
+
+  usePolling(assets.reload, 25000);
 
   return (
     <div className="screen">
@@ -20,7 +25,7 @@ export function HomeScreen() {
         <div className="home-card">
           <p className="screen-header__sub">가용 포인트</p>
           <p className="home-card__points">
-            {user.availablePoints.toLocaleString()}P
+            {(assets.summary?.availablePoints ?? user.availablePoints).toLocaleString()}P
           </p>
           <p className="screen-header__sub">{user.nickname}님</p>
         </div>

@@ -66,12 +66,21 @@ export const EWMA_P0 = 0.5;
 
 /** 밈 등급 라벨 고정 매핑 (F-20, I-3 · P-4를 코드 구조로 보장). */
 export const MEME_LABELS = {
-  ON_TIME: "블루칩 🛡️",
-  LATE_1_10: "조정장 📉",
+  ON_TIME: "상한가 🔼",
+  LATE_1_10: "숨고르기 😮‍💨",
   LATE_11_30: "폭락장 😱",
   LATE_31_PLUS: "서킷브레이커 🚨",
   NO_SHOW: "상장폐지 💀",
 } as const;
+
+/** 각 밈 라벨이 어떤 판정 구간을 뜻하는지 (범례 표시용). */
+export const MEME_LABEL_CRITERIA: Record<keyof typeof MEME_LABELS, string> = {
+  ON_TIME: "정시 도착",
+  LATE_1_10: "1~10분 지각",
+  LATE_11_30: "11~30분 지각",
+  LATE_31_PLUS: "31~59분 지각",
+  NO_SHOW: "노쇼 (60분/미인증)",
+};
 
 /**
  * late_minutes(및 노쇼 여부)로 밈 등급 라벨을 결정한다.
