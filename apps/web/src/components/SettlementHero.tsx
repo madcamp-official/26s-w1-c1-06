@@ -7,11 +7,13 @@ interface SettlementHeroProps {
 
 export function SettlementHero({ vm }: SettlementHeroProps) {
   const verdictText =
-    vm.verdict === "on_time"
-      ? "정시 도착"
-      : vm.verdict === "no_show"
-        ? "노쇼 (미인증)"
-        : `${vm.lateMinutes}분 지각`;
+    vm.verdict === "early_exit"
+      ? "약속 판정 전 조기 청산"
+      : vm.verdict === "on_time"
+        ? "정시 도착"
+        : vm.verdict === "no_show"
+          ? "노쇼 (미인증)"
+          : `${vm.lateMinutes}분 지각`;
 
   return (
     <section

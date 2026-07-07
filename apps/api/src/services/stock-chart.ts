@@ -74,7 +74,7 @@ export async function getStockChart(
      FROM promise_participants pp
      JOIN promises pr ON pr.id = pp.promise_id
      WHERE pp.user_id = $1 AND pp.verdict IS NOT NULL
-     ORDER BY pr.promised_at ASC`,
+     ORDER BY pr.settled_at ASC`,
     [targetUserId],
   );
 
