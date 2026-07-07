@@ -10,6 +10,7 @@ import {
   listPromises,
   respondToInvite,
 } from "../services/promises.js";
+import { getReactionSummary, setReaction } from "../services/reactions.js";
 
 export const promisesRouter = Router();
 
@@ -124,5 +125,25 @@ promisesRouter.get(
     if (!id) throw new HttpError(400, "약속 id가 필요합니다.");
     const result = await getPromiseParticipants(req.user!.id, id);
     res.json(result);
+  }),
+);
+
+promisesRouter.post(
+  "/:id/reactions",
+  asyncHandler(async (req, res) => {
+    const id = req.params.id;
+    if (!id) throw new HttpError(400, "약속 id가 필요합니다.");
+    await setReaction(id, req.user!.id, req.body?.emoji);
+    res.json({ ok: true });
+  }),
+);
+
+promisesRouter.get(
+  "/:id/reactions",
+  asyncHandler(async (req, res) => {
+    const id = req.params.id;
+    if (!id) throw new HttpError(400, "약속 id가 필요합니다.");
+    const summary = await getReactionSummary(id, req.user!.id);
+    res.json(summary);
   }),
 );

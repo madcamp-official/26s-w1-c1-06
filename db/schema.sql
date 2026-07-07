@@ -11,14 +11,17 @@ CREATE TYPE friend_status   AS ENUM ('pending', 'accepted');                    
 CREATE TYPE invite_status   AS ENUM ('invited', 'accepted', 'declined', 'auto_declined'); -- F-19
 CREATE TYPE verdict_type    AS ENUM ('on_time', 'late', 'no_show');                 -- F-06
 CREATE TYPE position_dir    AS ENUM ('buy', 'short');                               -- F-10/F-11
-CREATE TYPE position_status AS ENUM ('open', 'settled', 'cancelled');               -- cancelled = S-08(2차)
+CREATE TYPE position_status AS ENUM ('open', 'settled', 'cancelled');               -- cancelled = S-08(2차), option_positions도 재사용
+CREATE TYPE option_type     AS ENUM ('call', 'put');                                -- S-04
 CREATE TYPE tx_type         AS ENUM ('signup_grant',       -- F-09 가입 지급
                                      'position_lock',      -- F-10/F-11 잠금(음수)
                                      'position_unlock',    -- F-12 잠금 반환(양수)
                                      'position_payout',    -- F-12 손익(±)
                                      'defense_reward',     -- F-15 방어 보상(양수)
                                      'self_stock_buy',     -- F-17 행사(음수)
-                                     'self_stock_sell');   -- F-18 매도(양수)
+                                     'self_stock_sell',    -- F-18 매도(양수)
+                                     'option_premium',     -- S-04 프리미엄 지불(음수)
+                                     'option_payout');     -- S-04 행사 배당(양수, 실패 시 미기록)
 
 -- ---------- users : 계정 + 종목(1:1 병합) + 지갑 ----------
 -- 주식은 가입 시 유저당 1개·전역 단일 가격(v7 R-3)이므로 별도 stock 테이블 없이 병합.
@@ -114,7 +117,7 @@ CREATE TABLE positions (
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     settled_at     TIMESTAMPTZ,
     CHECK (investor_id <> stock_user_id),                    -- P-5: 자기 주식 포지션 원천 차단(DB 레벨)
-    CHECK (locked_points = quantity * open_price),           -- D3 잠금 공식 위반 데이터 차단
+    CHECK (locked_points = quantity * open_price),           -- D3 잠금 공식 위반 데이터 차단(잠금=마진은 배율과 무관 고정, S-05는 손익에만 배수 적용)
     CHECK (payout IS NULL OR payout >= -locked_points),      -- D3 손실 클램프: 잠금 초과 손실 데이터 차단
     -- 상태 정합: settled면 정산 필드 필수, 아니면 전부 NULL
     CHECK (
@@ -168,5 +171,17 @@ CREATE TABLE point_transactions (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_tx_user ON point_transactions (user_id, created_at DESC);                  -- 내역 화면(SC-15/16)
+
+-- ---------- reactions : 정산 결과 이모지 리액션 (S-09) ----------
+-- 자유 텍스트 없음(P-4 가드레일) — 화이트리스트를 CHECK로 DB 레벨 보장.
+CREATE TABLE reactions (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    promise_id  BIGINT NOT NULL REFERENCES promises(id) ON DELETE CASCADE,
+    user_id     BIGINT NOT NULL REFERENCES users(id),
+    emoji       VARCHAR(8) NOT NULL CHECK (emoji IN ('😱','📉','🛡️','🔥')),
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (promise_id, user_id)                                -- 1인 1약속 1이모지(재반응은 갱신)
+);
+CREATE INDEX idx_reactions_promise ON reactions (promise_id);
 
 COMMIT;

@@ -4,6 +4,7 @@ import {
   SELF_STOCK_OPTION_TTL_HOURS,
 } from "@latestock/shared";
 import type pg from "pg";
+import { settleOptionsForStock } from "../services/options.js";
 import { computePayout } from "./payout.js";
 import { computeEwmaLateP, computeNewPrice } from "./pricing.js";
 import { computeVerdict } from "./verdict.js";
@@ -24,6 +25,7 @@ interface UserPriceRow {
   id: string;
   current_price: number;
   ewma_late_p: number;
+  on_time_streak: number;
 }
 
 interface PositionRow {
@@ -33,6 +35,7 @@ interface PositionRow {
   direction: "buy" | "short";
   quantity: number;
   locked_points: number;
+  multiplier: number;
 }
 
 /**
@@ -86,7 +89,7 @@ export async function settleOnePromise(
 
     if (stockUserIds.length > 0) {
       const usersResult = await client.query<UserPriceRow>(
-        `SELECT id, current_price, ewma_late_p
+        `SELECT id, current_price, ewma_late_p, on_time_streak
          FROM users
          WHERE id = ANY($1::bigint[])
          FOR UPDATE`,
@@ -113,10 +116,12 @@ export async function settleOnePromise(
         );
         const after = computeNewPrice(before, verdict, lateMinutes);
         const ewma = computeEwmaLateP(user.ewma_late_p, verdict);
+        const streak = verdict === "on_time" ? user.on_time_streak + 1 : 0;
 
         priceAfter.set(userId, after);
         user.current_price = after;
         user.ewma_late_p = ewma;
+        user.on_time_streak = streak;
 
         await client.query(
           `UPDATE promise_participants
@@ -126,15 +131,18 @@ export async function settleOnePromise(
         );
 
         await client.query(
-          `UPDATE users SET current_price = $2, ewma_late_p = $3 WHERE id = $1`,
-          [userId, after, ewma],
+          `UPDATE users SET current_price = $2, ewma_late_p = $3, on_time_streak = $4 WHERE id = $1`,
+          [userId, after, ewma, streak],
         );
+
+        // S-04 옵션 정산 — strike 없는 이진 행사(콜=정시, 풋=지각/노쇼)
+        await settleOptionsForStock(client, promiseId, userId, verdict, now);
       }
     }
 
     // ⑤ open 포지션 정산
     const positionsResult = await client.query<PositionRow>(
-      `SELECT id, investor_id, stock_user_id, direction, quantity, locked_points
+      `SELECT id, investor_id, stock_user_id, direction, quantity, locked_points, multiplier
        FROM positions
        WHERE promise_id = $1 AND status = 'open'
        FOR UPDATE`,
@@ -153,6 +161,7 @@ export async function settleOnePromise(
         before,
         after,
         pos.locked_points,
+        pos.multiplier,
       );
       const investorId = Number(pos.investor_id);
       const positionId = Number(pos.id);

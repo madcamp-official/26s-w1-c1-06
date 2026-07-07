@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AsyncState } from "../components/AsyncState";
 import { StockCandlestickChart } from "../components/StockCandlestickChart";
+import { OptionOrderPanel } from "../components/trade/OptionOrderPanel";
 import { OrderPanel } from "../components/trade/OrderPanel";
 import { StockRankingTable } from "../components/trade/StockRankingTable";
 import { useAuth } from "../context/AuthContext";
@@ -128,13 +129,22 @@ export function FriendsMarketScreen() {
               </div>
             </section>
 
-            <OrderPanel
-              stock={selected}
-              promises={promises}
-              promisesLoading={promisesLoading}
-              availablePoints={availablePoints}
-              onSuccess={loadMarket}
-            />
+            <div className="trade-dashboard__order-stack">
+              <OrderPanel
+                stock={selected}
+                promises={promises}
+                promisesLoading={promisesLoading}
+                availablePoints={availablePoints}
+                onSuccess={loadMarket}
+              />
+              <OptionOrderPanel
+                stock={selected}
+                promises={promises}
+                promisesLoading={promisesLoading}
+                availablePoints={availablePoints}
+                onSuccess={loadMarket}
+              />
+            </div>
           </div>
 
           {friends && friends.length > 0 && (

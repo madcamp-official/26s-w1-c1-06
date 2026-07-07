@@ -1,4 +1,5 @@
 import {
+  ALLOWED_MULTIPLIERS,
   computeLockedPoints,
   computePayout,
   isBettable,
@@ -14,6 +15,7 @@ export interface OpenPositionInput {
   promiseId: string;
   direction: PositionDirection;
   quantity: number;
+  multiplier?: number;
 }
 
 export interface PositionView {
@@ -27,6 +29,7 @@ export interface PositionView {
   quantity: number;
   openPrice: number;
   lockedPoints: number;
+  multiplier: number;
   status: "open" | "settled" | "cancelled";
   priceBefore: number | null;
   priceAfter: number | null;
@@ -46,6 +49,7 @@ interface PositionRow {
   quantity: number;
   open_price: number;
   locked_points: number;
+  multiplier: number;
   status: "open" | "settled" | "cancelled";
   price_before: number | null;
   price_after: number | null;
@@ -66,6 +70,7 @@ function mapPosition(row: PositionRow): PositionView {
     quantity: row.quantity,
     openPrice: row.open_price,
     lockedPoints: row.locked_points,
+    multiplier: row.multiplier,
     status: row.status,
     priceBefore: row.price_before,
     priceAfter: row.price_after,
@@ -106,6 +111,13 @@ export async function openPosition(
   }
   if (investorId === input.stockUserId) {
     throw new HttpError(403, "자기 주식에는 베팅할 수 없습니다.");
+  }
+  const multiplier = input.multiplier ?? 1;
+  if (!(ALLOWED_MULTIPLIERS as readonly number[]).includes(multiplier)) {
+    throw new HttpError(
+      400,
+      `multiplier는 ${ALLOWED_MULTIPLIERS.join("/")} 중 하나여야 합니다.`,
+    );
   }
 
   const pool = getPool();
@@ -211,9 +223,9 @@ export async function openPosition(
     const inserted = await client.query<{ id: string }>(
       `INSERT INTO positions (
          investor_id, stock_user_id, promise_id, direction,
-         quantity, open_price, locked_points
+         quantity, open_price, locked_points, multiplier
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id`,
       [
         investorId,
@@ -223,6 +235,7 @@ export async function openPosition(
         input.quantity,
         openPrice,
         lockedPoints,
+        multiplier,
       ],
     );
     const positionId = inserted.rows[0]?.id;
@@ -326,9 +339,10 @@ export async function closePosition(
       quantity: number;
       open_price: number;
       locked_points: number;
+      multiplier: number;
       status: "open" | "settled" | "cancelled";
     }>(
-      `SELECT investor_id, stock_user_id, direction, quantity, open_price, locked_points, status
+      `SELECT investor_id, stock_user_id, direction, quantity, open_price, locked_points, multiplier, status
        FROM positions
        WHERE id = $1
        FOR UPDATE`,
@@ -360,6 +374,7 @@ export async function closePosition(
       position.open_price,
       currentPrice,
       position.locked_points,
+      position.multiplier,
     );
 
     await client.query(
@@ -430,7 +445,7 @@ export async function listPositions(
   const result = await pool.query<PositionRow>(
     `SELECT p.id, p.stock_user_id, u.nickname AS stock_nickname,
             p.promise_id, pr.title AS promise_title, pr.promised_at,
-            p.direction, p.quantity, p.open_price, p.locked_points,
+            p.direction, p.quantity, p.open_price, p.locked_points, p.multiplier,
             p.status, p.price_before, p.price_after, p.payout,
             p.created_at, p.settled_at
      FROM positions p

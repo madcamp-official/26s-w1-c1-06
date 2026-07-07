@@ -1,4 +1,4 @@
-import type { InviteStatus, PositionDirection, Verdict } from "@latestock/shared";
+import type { InviteStatus, OptionType, PositionDirection, Verdict } from "@latestock/shared";
 
 export interface PositionView {
   id: string;
@@ -11,9 +11,27 @@ export interface PositionView {
   quantity: number;
   openPrice: number;
   lockedPoints: number;
+  multiplier: number;
   status: "open" | "settled" | "cancelled";
   priceBefore: number | null;
   priceAfter: number | null;
+  payout: number | null;
+  createdAt: string;
+  settledAt: string | null;
+}
+
+export interface OptionPositionView {
+  id: string;
+  stockUserId: string;
+  stockNickname: string;
+  promiseId: string;
+  promiseTitle: string;
+  promisedAt: string;
+  optionType: OptionType;
+  quantity: number;
+  referencePrice: number;
+  premiumPaid: number;
+  status: "open" | "settled" | "cancelled";
   payout: number | null;
   createdAt: string;
   settledAt: string | null;
@@ -52,6 +70,16 @@ export interface FriendView {
   userId: string;
   nickname: string;
   currentPrice: number;
+  onTimeStreak: number;
+  lateRiskPct: number;
+}
+
+export interface RankingEntryView {
+  userId: string;
+  nickname: string;
+  totalPayout: number;
+  totalLocked: number;
+  returnPct: number;
 }
 
 export interface DemoSettleResult {

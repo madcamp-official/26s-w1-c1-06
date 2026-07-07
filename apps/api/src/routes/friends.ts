@@ -4,6 +4,7 @@ import { asyncHandler } from "../lib/async-handler.js";
 import { HttpError } from "../lib/errors.js";
 import {
   acceptFriendRequest,
+  getFriendRanking,
   listFriends,
   listIncomingFriendRequests,
   rejectFriendRequest,
@@ -19,6 +20,14 @@ friendsRouter.get(
   asyncHandler(async (req, res) => {
     const friends = await listFriends(req.user!.id);
     res.json({ friends });
+  }),
+);
+
+friendsRouter.get(
+  "/rankings",
+  asyncHandler(async (req, res) => {
+    const rankings = await getFriendRanking(req.user!.id);
+    res.json({ rankings });
   }),
 );
 

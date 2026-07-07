@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { MarketSummaryCard } from "../components/MarketSummaryCard";
+import { RankingCard } from "../components/RankingCard";
 import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAuth } from "../context/AuthContext";
 
@@ -26,6 +27,8 @@ export function HomeScreen() {
       )}
 
       <MarketSummaryCard />
+
+      <RankingCard />
 
       <div className="home-links">
         <Link to="/demo" className="link-card">

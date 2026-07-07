@@ -26,7 +26,12 @@ export type TxType =
   | "position_payout"
   | "defense_reward"
   | "self_stock_buy"
-  | "self_stock_sell";
+  | "self_stock_sell"
+  | "option_premium"
+  | "option_payout";
+
+/** schema.sql option_type ENUM (S-04). */
+export type OptionType = "call" | "put";
 
 /** 위경도 좌표 (도 단위). */
 export interface LatLng {
