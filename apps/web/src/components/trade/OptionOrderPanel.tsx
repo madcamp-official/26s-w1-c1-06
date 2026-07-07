@@ -2,7 +2,10 @@ import { computeOptionPremium, type OptionType } from "@latestock/shared";
 import { useState } from "react";
 import { ApiError } from "../../lib/api";
 import { buyOption } from "../../lib/endpoints";
+import { InlineToast } from "../InlineToast";
+import { RippleButton } from "../RippleButton";
 import type { BettablePromiseView, FriendView } from "../../types/api";
+import { BettingCountdown } from "./BettingCountdown";
 
 interface OptionOrderPanelProps {
   stock: FriendView | null;
@@ -25,6 +28,7 @@ export function OptionOrderPanel({
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ key: number; message: string } | null>(null);
 
   const currentPrice = stock?.currentPrice ?? 0;
   const p = (stock?.lateRiskPct ?? 0) / 100;
@@ -33,6 +37,10 @@ export function OptionOrderPanel({
       ? computeOptionPremium(optionType, currentPrice, quantity, p)
       : 0;
   const payoutEstimate = stock && quantity > 0 ? currentPrice * quantity : 0;
+  const selectedPromise = promises.find((item) => item.id === promiseId) ?? null;
+  const bettingClosed = selectedPromise
+    ? new Date(selectedPromise.promisedAt).getTime() <= Date.now()
+    : false;
 
   async function handleSubmit() {
     if (!stock) {
@@ -56,6 +64,10 @@ export function OptionOrderPanel({
         promiseId,
         optionType,
         quantity,
+      });
+      setToast({
+        key: Date.now(),
+        message: `${optionType === "call" ? "콜" : "풋"} 매수 체결! ${quantity}계약`,
       });
       onSuccess();
     } catch (err) {
@@ -115,6 +127,8 @@ export function OptionOrderPanel({
         </select>
       </label>
 
+      {selectedPromise && <BettingCountdown deadline={selectedPromise.promisedAt} />}
+
       <label className="trade-field">
         <span className="trade-field__label">수량 (계약)</span>
         <input
@@ -153,14 +167,22 @@ export function OptionOrderPanel({
         </p>
       )}
 
-      <button
+      {toast && <InlineToast toastKey={toast.key} message={toast.message} />}
+
+      <RippleButton
         type="button"
         className={`trade-order__submit${optionType === "put" ? " trade-order__submit--short" : ""}`}
-        disabled={!stock || isSubmitting}
+        disabled={!stock || isSubmitting || bettingClosed}
         onClick={handleSubmit}
       >
-        {isSubmitting ? "처리 중..." : optionType === "call" ? "콜 매수" : "풋 매수"}
-      </button>
+        {isSubmitting
+          ? "처리 중..."
+          : bettingClosed
+            ? "베팅 마감됨"
+            : optionType === "call"
+              ? "콜 매수"
+              : "풋 매수"}
+      </RippleButton>
     </aside>
   );
 }

@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import { AnimatedNumber } from "../components/AnimatedNumber";
+import { AutoSettlementReveal } from "../components/AutoSettlementReveal";
+import { FriendActivityFeed } from "../components/FriendActivityFeed";
 import { MarketSummaryCard } from "../components/MarketSummaryCard";
 import { RankingCard } from "../components/RankingCard";
 import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
@@ -14,6 +17,8 @@ export function HomeScreen() {
 
   return (
     <div className="screen">
+      <AutoSettlementReveal />
+
       <header className="screen-header">
         <h1>홈</h1>
         <p className="screen-header__sub">지각비 주식 시장에 오신 것을 환영합니다.</p>
@@ -25,7 +30,10 @@ export function HomeScreen() {
         <div className="home-card">
           <p className="screen-header__sub">가용 포인트</p>
           <p className="home-card__points">
-            {(assets.summary?.availablePoints ?? user.availablePoints).toLocaleString()}P
+            <AnimatedNumber
+              value={assets.summary?.availablePoints ?? user.availablePoints}
+              format={(n) => `${Math.round(n).toLocaleString()}P`}
+            />
           </p>
           <p className="screen-header__sub">{user.nickname}님</p>
         </div>
@@ -34,6 +42,8 @@ export function HomeScreen() {
       <MarketSummaryCard />
 
       <RankingCard />
+
+      <FriendActivityFeed />
 
       <div className="home-links">
         <Link to="/demo" className="link-card">

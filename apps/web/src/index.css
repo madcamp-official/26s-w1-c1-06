@@ -274,6 +274,130 @@ select {
   width: 100%;
 }
 
+/* 클릭 지점에서 퍼지는 리플 */
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-btn__ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  transform: scale(0);
+  opacity: 1;
+  animation: ripple-expand 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple-expand {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* 액션 직후 잠깐 떴다 사라지는 인라인 토스트 */
+.inline-toast {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  animation:
+    toast-pop 0.25s ease-out,
+    toast-fade 0.35s ease-in 1.85s forwards;
+}
+
+.inline-toast--success {
+  background: rgba(46, 204, 113, 0.15);
+  border: 1px solid rgba(46, 204, 113, 0.4);
+  color: #2ecc71;
+}
+
+.inline-toast--error {
+  background: rgba(198, 40, 40, 0.15);
+  border: 1px solid rgba(198, 40, 40, 0.4);
+  color: #ff8080;
+}
+
+@keyframes toast-pop {
+  from {
+    transform: translateY(-6px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+/* 베팅 마감 카운트다운 (I-2) */
+.betting-countdown {
+  margin: -4px 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+}
+
+.betting-countdown--urgent {
+  color: #ff5252;
+  animation: countdown-pulse 1s ease-in-out infinite;
+}
+
+.betting-countdown--closed {
+  color: #555;
+}
+
+@keyframes countdown-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* 값이 바뀔 때 카운트업 + 배경 플래시 (색은 건드리지 않음) */
+.animated-number {
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.animated-number--up {
+  animation: value-flash-up 0.7s ease-out;
+}
+
+.animated-number--down {
+  animation: value-flash-down 0.7s ease-out;
+}
+
+@keyframes value-flash-up {
+  0% {
+    background-color: rgba(214, 0, 0, 0.28);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes value-flash-down {
+  0% {
+    background-color: rgba(0, 81, 199, 0.28);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
 /* Empty / error states — Kakao service notice */
 .state-panel {
   text-align: center;
@@ -302,6 +426,55 @@ select {
   margin: 0 0 16px;
   color: var(--kakao-gray-500);
   font-size: 0.95rem;
+}
+
+/* 로딩 스켈레톤 — 정적인 "불러오는 중" 텍스트 대신 은은하게 반짝이는 자리표시자 */
+.state-panel--loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.skeleton-block {
+  background: linear-gradient(
+    90deg,
+    var(--kakao-gray-200) 25%,
+    #f2f2f2 37%,
+    var(--kakao-gray-200) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border-radius: 8px;
+}
+
+.skeleton-block--icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-block--line {
+  height: 14px;
+  width: 55%;
+}
+
+.skeleton-block--line-lg {
+  width: 45%;
+  height: 18px;
+}
+
+.skeleton-block--line-sm {
+  width: 32%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
 }
 
 /* Settlement result — Spotify Wrapped */
@@ -359,6 +532,123 @@ select {
   opacity: 0.8;
 }
 
+/* M6-1: 자동 정산 팝업 */
+.auto-reveal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.auto-reveal-modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #111;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.auto-reveal-modal .settlement-hero {
+  border-radius: 20px 20px 0 0;
+  min-height: 0;
+  padding: 40px 24px 24px;
+}
+
+.auto-reveal-payout {
+  margin: -8px 0 0;
+  padding: 0 24px;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 900;
+  background: #111;
+}
+
+.auto-reveal-reactions {
+  padding: 16px 24px 0;
+  background: #111;
+}
+
+.auto-reveal-modal .btn {
+  margin: 16px 24px 24px;
+  width: calc(100% - 48px);
+}
+
+.auto-reveal-modal--win {
+  animation: auto-reveal-pop 0.35s ease-out;
+}
+
+.auto-reveal-modal--lose {
+  animation:
+    auto-reveal-pop 0.35s ease-out,
+    auto-reveal-shake 0.4s ease-in-out 0.35s;
+}
+
+@keyframes auto-reveal-pop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes auto-reveal-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+.confetti {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.confetti__piece {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0.9;
+  animation: confetti-fall 1.1s ease-in forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(180px) rotate(340deg);
+    opacity: 0;
+  }
+}
+
 .result-page__body {
   background: #fff;
   color: var(--kakao-gray-900);
@@ -376,6 +666,16 @@ select {
   margin: 0 0 16px;
   color: var(--kakao-gray-500);
   font-size: 0.85rem;
+}
+
+.result-relational-line {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  color: var(--kakao-gray-500);
+}
+
+.result-relational-line strong {
+  color: var(--kakao-gray-900);
 }
 
 .stat-grid {
@@ -399,9 +699,33 @@ select {
 }
 
 .reaction-bar {
+  position: relative;
   display: flex;
   gap: 8px;
   margin: 16px 0;
+}
+
+.reaction-burst {
+  position: absolute;
+  bottom: 100%;
+  font-size: 1.4rem;
+  pointer-events: none;
+  animation: reaction-float 0.9s ease-out forwards;
+}
+
+@keyframes reaction-float {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 1;
+  }
+  30% {
+    transform: translateY(-10px) scale(1.25);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-52px) scale(1);
+    opacity: 0;
+  }
 }
 
 .reaction-bar__btn {
@@ -803,12 +1127,19 @@ select {
   align-items: center;
   gap: 12px;
   padding: 8px 4px;
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.ranking-card__row--top {
+  background: #fffdf0;
 }
 
 .ranking-card__rank {
   width: 22px;
   color: #888;
   font-weight: 700;
+  text-align: center;
 }
 
 .ranking-card__name {
@@ -818,6 +1149,72 @@ select {
 
 .ranking-card__pct {
   font-weight: 800;
+}
+
+.activity-feed {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.activity-feed__header h2 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.activity-feed__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.activity-feed__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  padding: 8px 4px;
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.activity-feed__link:hover {
+  background: #faf7e6;
+}
+
+.activity-feed__badge {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f4f0dc;
+  white-space: nowrap;
+}
+
+.activity-feed__body {
+  min-width: 0;
+}
+
+.activity-feed__text {
+  margin: 0;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-feed__meta {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  color: var(--kakao-gray-500);
 }
 
 .link-card {
@@ -838,6 +1235,26 @@ select {
 .link-card:hover {
   border-color: var(--kakao-yellow);
   background: #fffdf0;
+}
+
+.notification-opt-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  background: #fffdf0;
+  border: 1px solid var(--kakao-yellow);
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.notification-opt-in--denied {
+  display: block;
+  background: #fff5f5;
+  border-color: #ffbdbd;
+  color: #c23838;
 }
 
 .notification-list {
@@ -1467,6 +1884,32 @@ select {
   border-color: var(--kakao-yellow);
 }
 
+.trade-order__bettor-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: -4px 0 4px;
+}
+
+.trade-order__bettor-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: #0051c7;
+  overflow: hidden;
+}
+
+.trade-order__bettor-bar-buy {
+  height: 100%;
+  background: #d60000;
+  border-radius: 999px 0 0 999px;
+}
+
+.trade-order__bettor-text {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--kakao-gray-400, #999);
+}
+
 .trade-order__liquidation-notice {
   margin: 0;
   padding: 10px 12px;
@@ -2063,6 +2506,21 @@ select {
   white-space: nowrap;
 }
 
+.trade-ranking__streak--hot {
+  color: #ffa726;
+  animation: streak-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes streak-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
 .trade-ranking__btn {
   border: 1px solid #333;
   background: transparent;
@@ -2087,6 +2545,11 @@ select {
 
 .trade-dashboard .state-message {
   color: #888;
+}
+
+.trade-dashboard .skeleton-block {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 37%, #2a2a2a 63%);
+  background-size: 400% 100%;
 }
 
 @media (max-width: 767px) {

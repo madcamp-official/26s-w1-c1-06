@@ -11,9 +11,16 @@ interface ReactionBarProps {
   promiseId: string;
 }
 
+interface Burst {
+  id: number;
+  emoji: ReactionEmoji;
+  left: number;
+}
+
 /** 정산 결과 이모지 리액션 (S-09) — 자유 텍스트 없음. */
 export function ReactionBar({ promiseId }: ReactionBarProps) {
   const [summary, setSummary] = useState<ReactionSummary | null>(null);
+  const [bursts, setBursts] = useState<Burst[]>([]);
 
   useEffect(() => {
     apiFetch<ReactionSummary>(`/api/promises/${promiseId}/reactions`)
@@ -22,6 +29,7 @@ export function ReactionBar({ promiseId }: ReactionBarProps) {
   }, [promiseId]);
 
   async function handleClick(emoji: ReactionEmoji) {
+    setBursts((b) => [...b, { id: Date.now() + Math.random(), emoji, left: 10 + Math.random() * 80 }]);
     try {
       await apiFetch(`/api/promises/${promiseId}/reactions`, {
         method: "POST",
@@ -40,6 +48,16 @@ export function ReactionBar({ promiseId }: ReactionBarProps) {
 
   return (
     <section className="reaction-bar" aria-label="이모지 리액션">
+      {bursts.map((b) => (
+        <span
+          key={b.id}
+          className="reaction-burst"
+          style={{ left: `${b.left}%` }}
+          onAnimationEnd={() => setBursts((bs) => bs.filter((x) => x.id !== b.id))}
+        >
+          {b.emoji}
+        </span>
+      ))}
       {ALLOWED_REACTIONS.map((emoji) => {
         const isMine = summary.myReaction === emoji;
         return (
