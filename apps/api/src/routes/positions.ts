@@ -22,7 +22,7 @@ positionsRouter.use(requireAuth);
 positionsRouter.post(
   "/",
   asyncHandler(async (req, res) => {
-    const { stockUserId, promiseId, direction, quantity } = req.body ?? {};
+    const { stockUserId, promiseId, direction, quantity, multiplier } = req.body ?? {};
 
     if (typeof stockUserId !== "string" || typeof promiseId !== "string") {
       throw new HttpError(400, "stockUserId와 promiseId가 필요합니다.");
@@ -33,12 +33,16 @@ positionsRouter.post(
     if (typeof quantity !== "number") {
       throw new HttpError(400, "quantity가 필요합니다.");
     }
+    if (multiplier !== undefined && typeof multiplier !== "number") {
+      throw new HttpError(400, "multiplier는 숫자여야 합니다.");
+    }
 
     const position = await openPosition(req.user!.id, {
       stockUserId,
       promiseId,
       direction,
       quantity,
+      multiplier,
     });
     res.status(201).json({ position });
   }),

@@ -45,18 +45,17 @@ async function ensureVirtualUser(
     [email],
   );
   if (existing.rows[0]) {
-    await client.query(`UPDATE users SET current_price = $2, nickname = $3 WHERE id = $1`, [
-      existing.rows[0].id,
-      currentPrice,
-      nickname,
-    ]);
+    await client.query(
+      `UPDATE users SET current_price = $2, nickname = $3, auto_accept_invites = true WHERE id = $1`,
+      [existing.rows[0].id, currentPrice, nickname],
+    );
     return existing.rows[0].id;
   }
 
   const hash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
   const inserted = await client.query<{ id: string }>(
-    `INSERT INTO users (email, password_hash, nickname, available_points, current_price)
-     VALUES ($1, $2, $3, 0, $4)
+    `INSERT INTO users (email, password_hash, nickname, available_points, current_price, auto_accept_invites)
+     VALUES ($1, $2, $3, 0, $4, true)
      RETURNING id::text`,
     [email, hash, nickname, currentPrice],
   );
