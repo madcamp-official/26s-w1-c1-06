@@ -4,9 +4,14 @@ import {
   computeLockedPoints,
 } from "@latestock/shared";
 import { useState } from "react";
+import { useBettorSummary } from "../../hooks/useBettorSummary";
 import { ApiError } from "../../lib/api";
 import { openPosition } from "../../lib/endpoints";
+import { AnimatedNumber } from "../AnimatedNumber";
+import { InlineToast } from "../InlineToast";
+import { RippleButton } from "../RippleButton";
 import type { BettablePromiseView, FriendView } from "../../types/api";
+import { BettingCountdown } from "./BettingCountdown";
 
 type TradeSide = "buy" | "short";
 
@@ -31,11 +36,20 @@ export function OrderPanel({
   const [multiplier, setMultiplier] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ key: number; message: string } | null>(null);
 
   const currentPrice = stock?.currentPrice ?? 0;
   const lockedEstimate =
     stock && quantity > 0 ? computeLockedPoints(quantity, currentPrice) : 0;
   const liquidation = computeLiquidationThreshold(side, multiplier);
+  const { summary: bettorSummary, reload: reloadBettorSummary } = useBettorSummary(
+    stock?.userId,
+    promiseId || undefined,
+  );
+  const selectedPromise = promises.find((p) => p.id === promiseId) ?? null;
+  const bettingClosed = selectedPromise
+    ? new Date(selectedPromise.promisedAt).getTime() <= Date.now()
+    : false;
 
   async function handleSubmit() {
     if (!stock) {
@@ -60,6 +74,11 @@ export function OrderPanel({
         direction: side,
         quantity,
         multiplier,
+      });
+      reloadBettorSummary();
+      setToast({
+        key: Date.now(),
+        message: `${side === "buy" ? "매수" : "공매도"} 체결! ${quantity}주 @ ${currentPrice.toLocaleString()}원`,
       });
       onSuccess();
     } catch (err) {
@@ -103,7 +122,9 @@ export function OrderPanel({
           <span className="trade-order__stock-avatar">{stock.nickname.slice(0, 1)}</span>
           <div>
             <p className="trade-order__stock-name">{stock.nickname}</p>
-            <p className="trade-order__stock-price">{stock.currentPrice.toLocaleString()}원</p>
+            <p className="trade-order__stock-price">
+              <AnimatedNumber value={stock.currentPrice} format={(n) => `${Math.round(n).toLocaleString()}원`} />
+            </p>
           </div>
         </div>
       ) : (
@@ -128,6 +149,30 @@ export function OrderPanel({
           ))}
         </select>
       </label>
+
+      {selectedPromise && <BettingCountdown deadline={selectedPromise.promisedAt} />}
+
+      {bettorSummary &&
+        (bettorSummary.buyCount > 0 || bettorSummary.shortCount > 0) && (
+          <div className="trade-order__bettor-summary">
+            <div className="trade-order__bettor-bar">
+              <div
+                className="trade-order__bettor-bar-buy"
+                style={{
+                  width: `${
+                    (bettorSummary.buyCount /
+                      (bettorSummary.buyCount + bettorSummary.shortCount)) *
+                    100
+                  }%`,
+                }}
+              />
+            </div>
+            <p className="trade-order__bettor-text">
+              매수 {bettorSummary.buyCount}명 · 공매도 {bettorSummary.shortCount}명이
+              이미 베팅했어요
+            </p>
+          </div>
+        )}
 
       <label className="trade-field">
         <span className="trade-field__label">수량 (주)</span>
@@ -196,14 +241,22 @@ export function OrderPanel({
         </p>
       )}
 
-      <button
+      {toast && <InlineToast toastKey={toast.key} message={toast.message} />}
+
+      <RippleButton
         type="button"
         className={`trade-order__submit${side === "short" ? " trade-order__submit--short" : ""}`}
-        disabled={!stock || isSubmitting}
+        disabled={!stock || isSubmitting || bettingClosed}
         onClick={handleSubmit}
       >
-        {isSubmitting ? "처리 중..." : side === "buy" ? "매수하기" : "공매도하기"}
-      </button>
+        {isSubmitting
+          ? "처리 중..."
+          : bettingClosed
+            ? "베팅 마감됨"
+            : side === "buy"
+              ? "매수하기"
+              : "공매도하기"}
+      </RippleButton>
     </aside>
   );
 }

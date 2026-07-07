@@ -1,8 +1,11 @@
 import { BASE_STOCK_PRICE } from "@latestock/shared";
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getFavorites, toggleFavorite } from "../../lib/favorites";
 import { FALL_COLOR, RISE_COLOR } from "../../theme";
 import type { FriendView } from "../../types/api";
+import { AnimatedNumber } from "../AnimatedNumber";
+
+const MEDALS = ["🥇", "🥈", "🥉"];
 
 interface StockRankingTableProps {
   friends: FriendView[];
@@ -13,6 +16,8 @@ interface StockRankingTableProps {
 export function StockRankingTable({ friends, selectedId, onSelect }: StockRankingTableProps) {
   const [query, setQuery] = useState("");
   const [favorites, setFavorites] = useState<string[]>(() => getFavorites());
+  const rowRefs = useRef(new Map<string, HTMLTableRowElement>());
+  const prevRectsRef = useRef(new Map<string, DOMRect>());
 
   function handleToggleFavorite(userId: string) {
     setFavorites(toggleFavorite(userId));
@@ -29,6 +34,28 @@ export function StockRankingTable({ friends, selectedId, onSelect }: StockRankin
       return b.currentPrice - a.currentPrice;
     });
   }, [friends, query, favorites]);
+
+  /** FLIP: 시세 갱신으로 순위가 바뀌면 행이 순간이동하지 않고 미끄러지듯 이동한다. */
+  useLayoutEffect(() => {
+    const newRects = new Map<string, DOMRect>();
+    rowRefs.current.forEach((el, id) => newRects.set(id, el.getBoundingClientRect()));
+
+    rowRefs.current.forEach((el, id) => {
+      const prev = prevRectsRef.current.get(id);
+      const next = newRects.get(id);
+      if (!prev || !next) return;
+      const deltaY = prev.top - next.top;
+      if (Math.abs(deltaY) < 1) return;
+      el.style.transition = "none";
+      el.style.transform = `translateY(${deltaY}px)`;
+      requestAnimationFrame(() => {
+        el.style.transition = "transform 0.35s ease";
+        el.style.transform = "";
+      });
+    });
+
+    prevRectsRef.current = newRects;
+  }, [ranked]);
 
   return (
     <section className="trade-ranking" aria-label="주식 랭킹">
@@ -63,13 +90,18 @@ export function StockRankingTable({ friends, selectedId, onSelect }: StockRankin
             {ranked.map((friend, index) => {
               const diff = friend.currentPrice - BASE_STOCK_PRICE;
               const isUp = diff >= 0;
-              const pct = ((diff / BASE_STOCK_PRICE) * 100).toFixed(1);
+              const pct = (diff / BASE_STOCK_PRICE) * 100;
               const isSelected = friend.userId === selectedId;
               const isFav = favorites.includes(friend.userId);
+              const medal = MEDALS[index];
 
               return (
                 <tr
                   key={friend.userId}
+                  ref={(el) => {
+                    if (el) rowRefs.current.set(friend.userId, el);
+                    else rowRefs.current.delete(friend.userId);
+                  }}
                   className={isSelected ? "trade-ranking__row--selected" : undefined}
                   onClick={() => onSelect(friend)}
                 >
@@ -87,7 +119,7 @@ export function StockRankingTable({ friends, selectedId, onSelect }: StockRankin
                       {isFav ? "★" : "☆"}
                     </button>
                   </td>
-                  <td className="trade-ranking__rank">{index + 1}</td>
+                  <td className="trade-ranking__rank">{medal ?? index + 1}</td>
                   <td>
                     <div className="trade-ranking__stock">
                       <span className="trade-ranking__avatar">{friend.nickname.slice(0, 1)}</span>
@@ -99,15 +131,21 @@ export function StockRankingTable({ friends, selectedId, onSelect }: StockRankin
                       </div>
                     </div>
                   </td>
-                  <td className="trade-ranking__price">{friend.currentPrice.toLocaleString()}원</td>
+                  <td className="trade-ranking__price">
+                    <AnimatedNumber
+                      value={friend.currentPrice}
+                      format={(n) => `${Math.round(n).toLocaleString()}원`}
+                    />
+                  </td>
                   <td
                     className="trade-ranking__change"
                     style={{ color: isUp ? RISE_COLOR : FALL_COLOR }}
                   >
-                    {isUp ? "+" : ""}
-                    {pct}%
+                    <AnimatedNumber value={pct} format={(n) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`} />
                   </td>
-                  <td className="trade-ranking__streak">
+                  <td
+                    className={`trade-ranking__streak${friend.onTimeStreak >= 3 ? " trade-ranking__streak--hot" : ""}`}
+                  >
                     {friend.onTimeStreak > 0 ? `🔥 ${friend.onTimeStreak}` : "—"}
                   </td>
                   <td>

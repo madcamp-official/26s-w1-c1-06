@@ -21,12 +21,10 @@ export function AsyncState({
 }: AsyncStateProps) {
   if (loading) {
     return (
-      <div className="state-panel">
-        <div className="state-icon" aria-hidden>
-          ⏳
-        </div>
-        <p className="state-title">불러오는 중...</p>
-        <p className="state-message">잠시만 기다려 주세요.</p>
+      <div className="state-panel state-panel--loading" aria-busy="true" aria-label="불러오는 중">
+        <div className="skeleton-block skeleton-block--icon" />
+        <div className="skeleton-block skeleton-block--line skeleton-block--line-lg" />
+        <div className="skeleton-block skeleton-block--line skeleton-block--line-sm" />
       </div>
     );
   }

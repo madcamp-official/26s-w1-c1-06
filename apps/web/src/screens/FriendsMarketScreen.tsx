@@ -1,6 +1,7 @@
 import { BASE_STOCK_PRICE } from "@latestock/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { AnimatedNumber } from "../components/AnimatedNumber";
 import { AsyncState } from "../components/AsyncState";
 import { StockCandlestickChart } from "../components/StockCandlestickChart";
 import { OptionOrderPanel } from "../components/trade/OptionOrderPanel";
@@ -103,7 +104,10 @@ export function FriendsMarketScreen() {
                   </div>
                   <div className="trade-chart__quote">
                     <span className="trade-chart__price">
-                      {selected.currentPrice.toLocaleString()}원
+                      <AnimatedNumber
+                        value={selected.currentPrice}
+                        format={(n) => `${Math.round(n).toLocaleString()}원`}
+                      />
                     </span>
                     <span
                       className="trade-chart__change"
