@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PlacePickerMap } from "../components/PlacePickerMap";
+import { PlaceSearchBox, type PlaceSearchResult } from "../components/PlaceSearchBox";
 import { ApiError } from "../lib/api";
 import { datetimeLocalToIso, defaultPromisedAtLocal } from "../lib/datetime-local";
 import { createPromise, listFriends } from "../lib/endpoints";
+import { GeolocationError, getCurrentPosition } from "../lib/geolocation";
 import type { FriendView } from "../types/api";
 
 const DEFAULT_LAT = 37.5665;
@@ -31,6 +33,7 @@ export function PromiseCreateScreen() {
   const [placeNameTouched, setPlaceNameTouched] = useState(false);
   const [latitude, setLatitude] = useState(DEFAULT_LAT);
   const [longitude, setLongitude] = useState(DEFAULT_LNG);
+  const [level, setLevel] = useState(3);
   const [promisedAt, setPromisedAt] = useState(defaultPromisedAtLocal());
 
   const [friends, setFriends] = useState<FriendView[]>([]);
@@ -39,6 +42,7 @@ export function PromiseCreateScreen() {
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
 
   useEffect(() => {
     listFriends()
@@ -53,6 +57,31 @@ export function PromiseCreateScreen() {
     setLongitude(lng);
     if (!placeNameTouched) {
       reverseGeocode(lat, lng, setPlaceName);
+    }
+  }
+
+  function handleSearchSelect(result: PlaceSearchResult) {
+    setLatitude(result.lat);
+    setLongitude(result.lng);
+    setPlaceName(result.placeName);
+    setPlaceNameTouched(true);
+    setLevel(2);
+  }
+
+  async function handleUseMyLocation() {
+    if (locating || submitting) return;
+    setLocating(true);
+    setErrorMsg(null);
+    try {
+      const { latitude: lat, longitude: lng } = await getCurrentPosition();
+      handleMapSelect(lat, lng);
+      setLevel(2);
+    } catch (err) {
+      setErrorMsg(
+        err instanceof GeolocationError ? err.message : "현재 위치를 가져오지 못했습니다.",
+      );
+    } finally {
+      setLocating(false);
     }
   }
 
@@ -121,7 +150,23 @@ export function PromiseCreateScreen() {
       </header>
 
       <form className="promise-form" onSubmit={(e) => void handleSubmit(e)}>
-        <PlacePickerMap latitude={latitude} longitude={longitude} onSelect={handleMapSelect} />
+        <PlaceSearchBox onSelect={handleSearchSelect} />
+
+        <button
+          type="button"
+          className="btn btn--secondary"
+          onClick={() => void handleUseMyLocation()}
+          disabled={locating || submitting}
+        >
+          {locating ? "위치 확인 중..." : "내 위치 사용"}
+        </button>
+
+        <PlacePickerMap
+          latitude={latitude}
+          longitude={longitude}
+          onSelect={handleMapSelect}
+          level={level}
+        />
 
         <label className="field">
           <span>제목</span>

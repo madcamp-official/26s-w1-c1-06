@@ -1,5 +1,6 @@
 import {
   canCheckin,
+  haversineMeters,
   maskParticipants,
   NO_SHOW_MINUTES,
   type InviteStatus,
@@ -455,6 +456,18 @@ export async function checkinToPromise(
       isAcceptedParticipant: part.invite_status === "accepted",
     });
 
+    const debugDistanceMeters = haversineMeters(
+      { lat: promise.latitude, lng: promise.longitude },
+      { lat: latitude, lng: longitude },
+    );
+    console.log("[CHECKIN-DEBUG]", {
+      promiseLat: promise.latitude,
+      promiseLng: promise.longitude,
+      reqLat: latitude,
+      reqLng: longitude,
+      distanceMeters: debugDistanceMeters,
+    });
+
     if (!guard.allowed) {
       if (guard.reason === "not_participant") {
         throw new HttpError(403, "수락한 참여자만 인증할 수 있습니다.");
@@ -462,7 +475,10 @@ export async function checkinToPromise(
       if (guard.reason === "out_of_window") {
         throw new HttpError(409, "인증 가능 시간이 아닙니다.");
       }
-      throw new HttpError(400, "약속 장소 반경(50m) 밖입니다.");
+      throw new HttpError(
+        400,
+        `약속 장소 반경(50m) 밖입니다. (실제 거리: ${Math.round(debugDistanceMeters)}m)`,
+      );
     }
 
     const updated = await client.query<{ checkin_at: Date }>(

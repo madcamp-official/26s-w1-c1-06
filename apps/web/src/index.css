@@ -2036,6 +2036,66 @@ select {
   cursor: pointer;
 }
 
+.place-search {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.place-search__form {
+  display: flex;
+  gap: 8px;
+}
+
+.place-search__input {
+  flex: 1;
+  border: 1px solid var(--kakao-gray-200);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--kakao-gray-100);
+}
+
+.place-search__results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--kakao-gray-200);
+  border-radius: 8px;
+}
+
+.place-search__result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--kakao-gray-200);
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.place-search__result:last-child {
+  border-bottom: none;
+}
+
+.place-search__result-name {
+  font-weight: 600;
+}
+
+.place-search__result-address {
+  font-size: 0.75rem;
+  color: var(--kakao-gray-500);
+}
+
 /* 약속 상세 (SC-09) */
 .promise-detail__title-row {
   display: flex;
