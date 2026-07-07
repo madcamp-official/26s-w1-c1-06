@@ -27,6 +27,13 @@ export interface ChartPoint {
   settledPrice: number;
 }
 
+export interface BettablePromiseView {
+  id: string;
+  title: string;
+  placeName: string;
+  promisedAt: string;
+}
+
 export interface PromiseView {
   id: string;
   creatorId: string;

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { MarketSummaryCard } from "../components/MarketSummaryCard";
 import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAuth } from "../context/AuthContext";
 
@@ -23,6 +24,8 @@ export function HomeScreen() {
           <p className="screen-header__sub">{user.nickname}님</p>
         </div>
       )}
+
+      <MarketSummaryCard />
 
       <div className="home-links">
         <Link to="/demo" className="link-card">

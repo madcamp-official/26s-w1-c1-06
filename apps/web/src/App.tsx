@@ -5,6 +5,7 @@ import { AssetsScreen } from "./screens/AssetsScreen";
 import { DemoScreen } from "./screens/DemoScreen";
 import { FriendDetailScreen } from "./screens/FriendDetailScreen";
 import { FriendsMarketScreen } from "./screens/FriendsMarketScreen";
+import { HistoryScreen } from "./screens/HistoryScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { LoginScreen } from "./screens/LoginScreen";
 import { PromisesScreen } from "./screens/PromisesScreen";
@@ -33,6 +34,7 @@ export function App() {
           <Route path="friends" element={<FriendsMarketScreen />} />
           <Route path="promises" element={<PromisesScreen />} />
           <Route path="assets" element={<AssetsScreen />} />
+          <Route path="history" element={<HistoryScreen />} />
           <Route path="demo" element={<DemoScreen />} />
         </Route>
         <Route path="friends/:userId" element={<FriendDetailScreen />} />

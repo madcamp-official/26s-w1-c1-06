@@ -87,6 +87,60 @@ async function isAcceptedFriend(
   return (result.rowCount ?? 0) > 0;
 }
 
+export interface BettablePromiseView {
+  id: string;
+  title: string;
+  placeName: string;
+  promisedAt: string;
+}
+
+interface BettablePromiseRow {
+  id: string;
+  title: string;
+  place_name: string;
+  promised_at: Date;
+}
+
+/**
+ * GET /stocks/:userId/promises — 종목(친구) 기준 베팅 가능 약속 (R-5).
+ * 조회자가 그 약속의 참여자인지는 무관하게, 종목이 accepted 참여자인 미정산·미래 약속만 반환.
+ */
+export async function listBettablePromisesForStock(
+  viewerId: string,
+  stockUserId: string,
+  now: Date = new Date(),
+): Promise<BettablePromiseView[]> {
+  if (viewerId === stockUserId) {
+    throw new HttpError(403, "자기 자신에게는 베팅할 수 없습니다.");
+  }
+
+  const pool = getPool();
+  requirePool(pool);
+
+  const isFriend = await isAcceptedFriend(pool, viewerId, stockUserId);
+  if (!isFriend) {
+    throw new HttpError(403, "친구인 종목의 약속만 조회할 수 있습니다.");
+  }
+
+  const result = await pool.query<BettablePromiseRow>(
+    `SELECT p.id, p.title, p.place_name, p.promised_at
+     FROM promises p
+     JOIN promise_participants pp ON pp.promise_id = p.id AND pp.user_id = $1::bigint
+     WHERE pp.invite_status = 'accepted'
+       AND p.settled_at IS NULL
+       AND p.promised_at > $2::timestamptz
+     ORDER BY p.promised_at ASC`,
+    [stockUserId, now],
+  );
+
+  return result.rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    placeName: row.place_name,
+    promisedAt: row.promised_at.toISOString(),
+  }));
+}
+
 async function getPromiseParticipantStatus(
   client: pg.Pool | pg.PoolClient,
   promiseId: string,

@@ -1,5 +1,6 @@
 import {
   computeLockedPoints,
+  computePayout,
   isBettable,
   type InviteStatus,
   type PositionDirection,
@@ -299,6 +300,109 @@ export async function confirmPosition(
       throw new HttpError(409, "아직 정산되지 않았습니다.");
     }
     throw new HttpError(409, "이미 확인한 정산입니다.");
+  }
+}
+
+/**
+ * POST /positions/:id/close — 조기 청산 (M3-2).
+ * 약속 정산을 기다리지 않고 현재가 기준으로 즉시 포지션을 정산한다.
+ */
+export async function closePosition(
+  investorId: string,
+  positionId: string,
+  now: Date = new Date(),
+): Promise<PositionView> {
+  const pool = getPool();
+  requirePool(pool);
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const positionResult = await client.query<{
+      investor_id: string;
+      stock_user_id: string;
+      direction: PositionDirection;
+      quantity: number;
+      open_price: number;
+      locked_points: number;
+      status: "open" | "settled" | "cancelled";
+    }>(
+      `SELECT investor_id, stock_user_id, direction, quantity, open_price, locked_points, status
+       FROM positions
+       WHERE id = $1
+       FOR UPDATE`,
+      [positionId],
+    );
+    const position = positionResult.rows[0];
+    if (!position) {
+      throw new HttpError(404, "포지션을 찾을 수 없습니다.");
+    }
+    if (position.investor_id !== investorId) {
+      throw new HttpError(403, "본인 포지션만 청산할 수 있습니다.");
+    }
+    if (position.status !== "open") {
+      throw new HttpError(409, "이미 정산되었거나 취소된 포지션입니다.");
+    }
+
+    const stockResult = await client.query<{ current_price: number }>(
+      `SELECT current_price FROM users WHERE id = $1 FOR UPDATE`,
+      [position.stock_user_id],
+    );
+    const currentPrice = stockResult.rows[0]?.current_price;
+    if (currentPrice === undefined) {
+      throw new HttpError(404, "종목을 찾을 수 없습니다.");
+    }
+
+    const payout = computePayout(
+      position.direction,
+      position.quantity,
+      position.open_price,
+      currentPrice,
+      position.locked_points,
+    );
+
+    await client.query(
+      `UPDATE positions
+       SET status = 'settled',
+           price_before = $2,
+           price_after = $3,
+           payout = $4,
+           settled_at = $5
+       WHERE id = $1`,
+      [positionId, position.open_price, currentPrice, payout, now],
+    );
+
+    await client.query(
+      `INSERT INTO point_transactions (user_id, amount, tx_type, ref_id)
+       VALUES ($1, $2, 'position_unlock', $3)`,
+      [investorId, position.locked_points, positionId],
+    );
+    if (payout !== 0) {
+      await client.query(
+        `INSERT INTO point_transactions (user_id, amount, tx_type, ref_id)
+         VALUES ($1, $2, 'position_payout', $3)`,
+        [investorId, payout, positionId],
+      );
+    }
+    await client.query(
+      `UPDATE users SET available_points = available_points + $2 WHERE id = $1`,
+      [investorId, position.locked_points + payout],
+    );
+
+    await client.query("COMMIT");
+
+    const list = await listPositions(investorId, undefined, positionId);
+    const closed = list[0];
+    if (!closed) {
+      throw new HttpError(500, "청산된 포지션을 조회할 수 없습니다.");
+    }
+    return closed;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
   }
 }
 

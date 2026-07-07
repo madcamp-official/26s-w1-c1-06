@@ -1,15 +1,15 @@
-import type { TxType } from "../hooks/useAssets";
+import type { TransactionView, TxType } from "../hooks/useAssets";
 
 export type TxFilter = "all" | "lock" | "settlement";
 
-export const TX_TYPE_META: Record<TxType, { label: string; icon: string }> = {
-  signup_grant: { label: "가입 지급", icon: "🎁" },
-  position_lock: { label: "베팅 잠금", icon: "🔒" },
-  position_unlock: { label: "잠금 해제", icon: "🔓" },
-  position_payout: { label: "정산 손익", icon: "💹" },
-  defense_reward: { label: "정시 방어 보상", icon: "🛡️" },
-  self_stock_buy: { label: "자기주식 매수", icon: "🏷️" },
-  self_stock_sell: { label: "자기주식 매도", icon: "💵" },
+export const TX_TYPE_META: Record<TxType, { label: string }> = {
+  signup_grant: { label: "가입 지급" },
+  position_lock: { label: "베팅 잠금" },
+  position_unlock: { label: "잠금 해제" },
+  position_payout: { label: "정산 손익" },
+  defense_reward: { label: "정시 방어 보상" },
+  self_stock_buy: { label: "자기주식 매수" },
+  self_stock_sell: { label: "자기주식 매도" },
 };
 
 /**
@@ -23,4 +23,43 @@ export function matchesTxFilter(txType: TxType, filter: TxFilter): boolean {
   if (filter === "all") return true;
   if (filter === "lock") return LOCK_TYPES.has(txType);
   return SETTLEMENT_TYPES.has(txType);
+}
+
+export interface TransactionGroup {
+  dateKey: string;
+  dateLabel: string;
+  transactions: TransactionView[];
+}
+
+/**
+ * 날짜별 묶음(내림차순 입력 가정 — 백엔드가 이미 created_at DESC로 정렬해 줌).
+ * 같은 날짜가 연속으로 오지 않는 입력에선 그룹이 여러 번 생길 수 있으니 호출 전 정렬 상태를 유지할 것.
+ */
+export function groupTransactionsByDate(
+  transactions: readonly TransactionView[],
+): TransactionGroup[] {
+  const groups: TransactionGroup[] = [];
+  let current: TransactionGroup | null = null;
+
+  for (const tx of transactions) {
+    const d = new Date(tx.createdAt);
+    const dateKey = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+
+    if (!current || current.dateKey !== dateKey) {
+      current = {
+        dateKey,
+        dateLabel: d.toLocaleDateString("ko-KR", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        transactions: [],
+      };
+      groups.push(current);
+    }
+
+    current.transactions.push(tx);
+  }
+
+  return groups;
 }

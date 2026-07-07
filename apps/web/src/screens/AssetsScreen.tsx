@@ -2,31 +2,19 @@ import { BASE_STOCK_PRICE } from "@latestock/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AsyncState } from "../components/AsyncState";
+import { OpenPositionsPanel } from "../components/OpenPositionsPanel";
 import { StockCandlestickChart } from "../components/StockCandlestickChart";
 import { OrderPanel } from "../components/trade/OrderPanel";
 import { StockRankingTable } from "../components/trade/StockRankingTable";
 import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAssets } from "../hooks/useAssets";
+import { useOpenPositions } from "../hooks/useOpenPositions";
+import { usePolling } from "../hooks/usePolling";
 import { useStockChart } from "../hooks/useStockChart";
-import { useUpcomingPromises } from "../hooks/useUpcomingPromises";
+import { useStockPromises } from "../hooks/useStockPromises";
 import { listFriends } from "../lib/endpoints";
-import { matchesTxFilter, TX_TYPE_META, type TxFilter } from "../lib/tx-type";
 import { FALL_COLOR, RISE_COLOR } from "../theme";
 import type { FriendView } from "../types/api";
-
-const FILTER_TABS: { key: TxFilter; label: string }[] = [
-  { key: "all", label: "전체" },
-  { key: "lock", label: "잠금" },
-  { key: "settlement", label: "정산" },
-];
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("ko-KR", {
-    year: "2-digit",
-    month: "2-digit",
-    day: "2-digit",
-  });
-}
 
 export function AssetsScreen() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -39,8 +27,8 @@ export function AssetsScreen() {
   const ownChart = useStockChart();
   const friendChart = useStockChart(selectedFriend?.userId);
   const assets = useAssets();
-  const { promises, isLoading: promisesLoading } = useUpcomingPromises();
-  const [filter, setFilter] = useState<TxFilter>("all");
+  const openPositions = useOpenPositions();
+  const { promises, isLoading: promisesLoading } = useStockPromises(selectedFriend?.userId);
 
   const chart = selectedFriend ? friendChart : ownChart;
   const chartTitle = selectedFriend ? `${selectedFriend.nickname}의 주식` : "내 주식";
@@ -62,6 +50,11 @@ export function AssetsScreen() {
     loadFriends();
   }, [loadFriends]);
 
+  usePolling(() => {
+    loadFriends();
+    openPositions.reload();
+  }, 25000);
+
   function handleSelectStock(friend: FriendView) {
     setSearchParams({ stock: friend.userId });
   }
@@ -69,10 +62,6 @@ export function AssetsScreen() {
   function handleClearStock() {
     setSearchParams({});
   }
-
-  const filteredTransactions = assets.transactions.filter((tx) =>
-    matchesTxFilter(tx.txType, filter),
-  );
 
   const priceDiff = currentPrice - BASE_STOCK_PRICE;
   const isUp = priceDiff >= 0;
@@ -82,7 +71,7 @@ export function AssetsScreen() {
       <header className="trade-dashboard__topbar">
         <div>
           <h1 className="trade-dashboard__title">자산</h1>
-          <p className="trade-dashboard__subtitle">가용·잠금 포인트와 거래 내역을 확인합니다.</p>
+          <p className="trade-dashboard__subtitle">가용·잠금 포인트와 보유 포지션을 확인합니다.</p>
         </div>
         {assets.summary && (
           <div className="trade-dashboard__topbar-right">
@@ -99,6 +88,17 @@ export function AssetsScreen() {
       </header>
 
       <UnconfirmedSettlementsBanner />
+
+      <OpenPositionsPanel
+        positions={openPositions.positions}
+        isLoading={openPositions.isLoading}
+        error={openPositions.error}
+        onRetry={openPositions.reload}
+        onClosed={() => {
+          openPositions.reload();
+          assets.reload();
+        }}
+      />
 
       <AsyncState
         loading={assets.isLoading && ownChart.isLoading}
@@ -159,6 +159,7 @@ export function AssetsScreen() {
                 availablePoints={assets.summary?.availablePoints ?? null}
                 onSuccess={() => {
                   loadFriends();
+                  openPositions.reload();
                 }}
               />
             ) : (
@@ -189,53 +190,6 @@ export function AssetsScreen() {
               onSelect={handleSelectStock}
             />
           )}
-
-          <section className="assets-history">
-            <header className="assets-history__header">
-              <h2>거래 내역</h2>
-              <div className="assets-history__tabs">
-                {FILTER_TABS.map((tab) => (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    className={`assets-history__tab${filter === tab.key ? " assets-history__tab--active" : ""}`}
-                    onClick={() => setFilter(tab.key)}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </header>
-
-            {filteredTransactions.length === 0 ? (
-              <p className="assets-history__empty">내역이 없습니다.</p>
-            ) : (
-              <ul className="assets-history__list">
-                {filteredTransactions.map((tx) => {
-                  const meta = TX_TYPE_META[tx.txType];
-                  const isPositive = tx.amount > 0;
-                  return (
-                    <li key={tx.id} className="assets-history__item">
-                      <div className="assets-history__item-left">
-                        <span className="assets-history__icon">{meta.icon}</span>
-                        <div>
-                          <div>{meta.label}</div>
-                          <div className="assets-history__date">{formatDate(tx.createdAt)}</div>
-                        </div>
-                      </div>
-                      <div
-                        className="assets-history__amount"
-                        style={{ color: isPositive ? RISE_COLOR : FALL_COLOR }}
-                      >
-                        {isPositive ? "+" : ""}
-                        {tx.amount.toLocaleString()}P
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
         </div>
       </AsyncState>
     </div>
