@@ -2,8 +2,10 @@ import type { OptionType } from "@latestock/shared";
 import { apiFetch } from "./api";
 import type {
   BettablePromiseView,
+  BettorSummary,
   ChartPoint,
   DemoSettleResult,
+  FriendActivityItem,
   FriendView,
   OptionPositionView,
   PositionView,
@@ -19,6 +21,10 @@ export function listFriends() {
 
 export function getFriendRanking() {
   return apiFetch<{ rankings: RankingEntryView[] }>("/api/friends/rankings");
+}
+
+export function getFriendActivityFeed() {
+  return apiFetch<{ items: FriendActivityItem[] }>("/api/friends/activity-feed");
 }
 
 export function listPromises(status?: "upcoming" | "ongoing" | "ended") {
@@ -116,6 +122,10 @@ export function getStockChart(userId: string) {
 
 export function getStockPromises(userId: string) {
   return apiFetch<{ promises: BettablePromiseView[] }>(`/api/stocks/${userId}/promises`);
+}
+
+export function getBettorSummary(userId: string, promiseId: string) {
+  return apiFetch<BettorSummary>(`/api/stocks/${userId}/promises/${promiseId}/bettors`);
 }
 
 export function demoSettle(body?: { now?: string; promiseId?: string | number }) {

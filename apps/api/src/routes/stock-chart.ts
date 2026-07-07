@@ -3,6 +3,7 @@ import { requireAuth } from "../auth/middleware.js";
 import { asyncHandler } from "../lib/async-handler.js";
 import { HttpError } from "../lib/errors.js";
 import { listBettablePromisesForStock } from "../services/promises.js";
+import { getBettorSummary } from "../services/positions.js";
 import { getStockChart } from "../services/stock-chart.js";
 
 /** GET /me/stock — 본인 차트 (F-08/F-13). */
@@ -41,5 +42,19 @@ stocksRouter.get(
     if (!userId) throw new HttpError(400, "userId가 필요합니다.");
     const promises = await listBettablePromisesForStock(req.user!.id, userId);
     res.json({ promises });
+  }),
+);
+
+/** GET /stocks/:userId/promises/:promiseId/bettors — 베팅 현황 공개 (M6-5). */
+stocksRouter.get(
+  "/:userId/promises/:promiseId/bettors",
+  asyncHandler(async (req, res) => {
+    const userId = req.params.userId;
+    const promiseId = req.params.promiseId;
+    if (!userId || !promiseId) {
+      throw new HttpError(400, "userId와 promiseId가 필요합니다.");
+    }
+    const summary = await getBettorSummary(req.user!.id, userId, promiseId);
+    res.json(summary);
   }),
 );

@@ -4,6 +4,7 @@ import { asyncHandler } from "../lib/async-handler.js";
 import { HttpError } from "../lib/errors.js";
 import {
   acceptFriendRequest,
+  getFriendActivityFeed,
   getFriendRanking,
   listFriends,
   listIncomingFriendRequests,
@@ -28,6 +29,14 @@ friendsRouter.get(
   asyncHandler(async (req, res) => {
     const rankings = await getFriendRanking(req.user!.id);
     res.json({ rankings });
+  }),
+);
+
+friendsRouter.get(
+  "/activity-feed",
+  asyncHandler(async (req, res) => {
+    const items = await getFriendActivityFeed(req.user!.id);
+    res.json({ items });
   }),
 );
 
