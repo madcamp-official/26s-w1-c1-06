@@ -2,13 +2,13 @@ import { computeLockedPoints } from "@latestock/shared";
 import { useState } from "react";
 import { ApiError } from "../../lib/api";
 import { openPosition } from "../../lib/endpoints";
-import type { FriendView, PromiseView } from "../../types/api";
+import type { BettablePromiseView, FriendView } from "../../types/api";
 
 type TradeSide = "buy" | "short";
 
 interface OrderPanelProps {
   stock: FriendView | null;
-  promises: PromiseView[];
+  promises: BettablePromiseView[];
   promisesLoading: boolean;
   availablePoints: number | null;
   onSuccess: () => void;
@@ -81,9 +81,15 @@ export function OrderPanel({
           className={`trade-order__tab trade-order__tab--short${side === "short" ? " trade-order__tab--active" : ""}`}
           onClick={() => setSide("short")}
         >
-          매도
+          공매도
         </button>
       </div>
+
+      <p className="trade-order__side-hint">
+        {side === "buy"
+          ? "정시 도착에 투자합니다. 정시일수록 이익이 커집니다."
+          : "지각·노쇼에 베팅합니다. 늦을수록 이익이 커집니다."}
+      </p>
 
       {stock ? (
         <div className="trade-order__stock">
@@ -140,9 +146,11 @@ export function OrderPanel({
         </div>
         <div className="trade-order__summary-row">
           <span>주문 유형</span>
-          <strong>{side === "buy" ? "매수" : "매도"}</strong>
+          <strong>{side === "buy" ? "매수" : "공매도"}</strong>
         </div>
       </div>
+
+      <p className="trade-order__note">현재가로 즉시 체결됩니다 (지정가 주문 없음).</p>
 
       {error && (
         <p className="trade-order__error" role="alert">
@@ -156,7 +164,7 @@ export function OrderPanel({
         disabled={!stock || isSubmitting}
         onClick={handleSubmit}
       >
-        {isSubmitting ? "처리 중..." : side === "buy" ? "매수하기" : "매도하기"}
+        {isSubmitting ? "처리 중..." : side === "buy" ? "매수하기" : "공매도하기"}
       </button>
     </aside>
   );

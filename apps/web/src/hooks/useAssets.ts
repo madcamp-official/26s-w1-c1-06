@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../lib/api";
 
 export type TxType =
@@ -28,6 +28,7 @@ interface UseAssetsResult {
   transactions: TransactionView[];
   isLoading: boolean;
   error: string | null;
+  reload: () => void;
 }
 
 /** GET /me/assets, GET /me/transactions — 자산 화면(SC-14/15) 데이터 (F-14). */
@@ -37,8 +38,7 @@ export function useAssets(): UseAssetsResult {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const reload = useCallback(() => {
     setIsLoading(true);
     setError(null);
 
@@ -47,23 +47,20 @@ export function useAssets(): UseAssetsResult {
       apiFetch<{ transactions: TransactionView[] }>("/api/me/transactions"),
     ])
       .then(([assetSummary, { transactions: txs }]) => {
-        if (cancelled) return;
         setSummary(assetSummary);
         setTransactions(txs);
       })
       .catch((err) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "자산 정보를 불러오지 못했습니다.");
-        }
+        setError(err instanceof Error ? err.message : "자산 정보를 불러오지 못했습니다.");
       })
       .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        setIsLoading(false);
       });
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
-  return { summary, transactions, isLoading, error };
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  return { summary, transactions, isLoading, error, reload };
 }

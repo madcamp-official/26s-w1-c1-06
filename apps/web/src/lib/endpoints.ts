@@ -1,5 +1,6 @@
 import { apiFetch } from "./api";
 import type {
+  BettablePromiseView,
   ChartPoint,
   DemoSettleResult,
   FriendView,
@@ -63,6 +64,12 @@ export function openPosition(body: {
   });
 }
 
+export function closePosition(positionId: string) {
+  return apiFetch<{ position: PositionView }>(`/api/positions/${positionId}/close`, {
+    method: "POST",
+  });
+}
+
 export function getMyAssets() {
   return apiFetch<{ availablePoints: number; lockedPoints: number }>("/api/me/assets");
 }
@@ -73,6 +80,10 @@ export function getMyStockChart() {
 
 export function getStockChart(userId: string) {
   return apiFetch<{ points: ChartPoint[] }>(`/api/stocks/${userId}`);
+}
+
+export function getStockPromises(userId: string) {
+  return apiFetch<{ promises: BettablePromiseView[] }>(`/api/stocks/${userId}/promises`);
 }
 
 export function demoSettle(body?: { now?: string; promiseId?: string | number }) {

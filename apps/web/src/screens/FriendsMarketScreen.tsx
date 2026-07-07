@@ -6,8 +6,9 @@ import { StockCandlestickChart } from "../components/StockCandlestickChart";
 import { OrderPanel } from "../components/trade/OrderPanel";
 import { StockRankingTable } from "../components/trade/StockRankingTable";
 import { useAuth } from "../context/AuthContext";
+import { usePolling } from "../hooks/usePolling";
 import { useStockChart } from "../hooks/useStockChart";
-import { useUpcomingPromises } from "../hooks/useUpcomingPromises";
+import { useStockPromises } from "../hooks/useStockPromises";
 import { getMyAssets, listFriends } from "../lib/endpoints";
 import { FALL_COLOR, RISE_COLOR } from "../theme";
 import type { FriendView } from "../types/api";
@@ -23,7 +24,7 @@ export function FriendsMarketScreen() {
   const selected = friends?.find((f) => f.userId === selectedId) ?? friends?.[0] ?? null;
 
   const chart = useStockChart(selected?.userId);
-  const { promises, isLoading: promisesLoading } = useUpcomingPromises();
+  const { promises, isLoading: promisesLoading } = useStockPromises(selected?.userId);
 
   const loadMarket = useCallback(() => {
     setLoadError(null);
@@ -40,6 +41,8 @@ export function FriendsMarketScreen() {
   useEffect(() => {
     loadMarket();
   }, [loadMarket]);
+
+  usePolling(loadMarket, 25000);
 
   useEffect(() => {
     if (!friends || friends.length === 0) return;

@@ -55,6 +55,16 @@ function verdictLabel(c: Candle): string {
   return `${c.lateMinutes}분 지각`;
 }
 
+const VERDICT_DOT_COLOR: Record<Verdict, string> = {
+  on_time: "#2ecc71",
+  late: "#f5a623",
+  no_show: "#e74c3c",
+};
+
+function daysSince(ts: number): number {
+  return Math.floor((Date.now() - ts) / (24 * 60 * 60 * 1000));
+}
+
 /** 정산 구간별 시가·종가 캔들 (한국식: 상승=빨강, 하락=파랑). */
 export function StockCandlestickChart({
   data,
@@ -126,6 +136,8 @@ export function StockCandlestickChart({
 
   const slotW = innerW / candles.length;
   const bodyW = Math.max(Math.min(slotW * 0.55, 36), 8);
+  const lastCandle = candles[candles.length - 1]!;
+  const daysSinceLast = daysSince(lastCandle.date);
 
   return (
     <div
@@ -133,6 +145,10 @@ export function StockCandlestickChart({
       className="candle-chart"
       style={{ height, width: "100%", position: "relative" }}
     >
+      <div className="candle-chart__last-settled">
+        {daysSinceLast <= 0 ? "오늘 정산" : `마지막 정산 ${daysSinceLast}일 전`}
+      </div>
+
       {hovered && (
         <div className="candle-chart__tooltip">
           <div>{formatDate(hovered.date)}</div>
@@ -157,7 +173,7 @@ export function StockCandlestickChart({
                 stroke={gridColor}
                 strokeDasharray="4 4"
               />
-              <text x={padding.left - 8} y={y + 4} textAnchor="end" fill={textColor} fontSize={11}>
+              <text x={padding.left - 8} y={y + 4} textAnchor="end" fill={textColor} fontSize={13}>
                 {tick.toLocaleString()}
               </text>
             </g>
@@ -190,7 +206,8 @@ export function StockCandlestickChart({
                 fill={color}
                 rx={1}
               />
-              <text x={cx} y={height - 8} textAnchor="middle" fill={textColor} fontSize={10}>
+              <circle cx={cx} cy={height - 18} r={3} fill={VERDICT_DOT_COLOR[c.verdict]} />
+              <text x={cx} y={height - 8} textAnchor="middle" fill={textColor} fontSize={12}>
                 {formatDate(c.date)}
               </text>
             </g>
