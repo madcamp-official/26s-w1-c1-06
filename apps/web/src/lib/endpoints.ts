@@ -1,17 +1,24 @@
+import type { OptionType } from "@latestock/shared";
 import { apiFetch } from "./api";
 import type {
   BettablePromiseView,
   ChartPoint,
   DemoSettleResult,
   FriendView,
+  OptionPositionView,
   PositionView,
   PromiseParticipantsView,
   PromiseView,
+  RankingEntryView,
   UnconfirmedSettlements,
 } from "../types/api";
 
 export function listFriends() {
   return apiFetch<{ friends: FriendView[] }>("/api/friends");
+}
+
+export function getFriendRanking() {
+  return apiFetch<{ rankings: RankingEntryView[] }>("/api/friends/rankings");
 }
 
 export function listPromises(status?: "upcoming" | "ongoing" | "ended") {
@@ -64,6 +71,7 @@ export function openPosition(body: {
   promiseId: string;
   direction: "buy" | "short";
   quantity: number;
+  multiplier?: number;
 }) {
   return apiFetch<{ position: PositionView }>("/api/positions", {
     method: "POST",
@@ -74,6 +82,23 @@ export function openPosition(body: {
 export function closePosition(positionId: string) {
   return apiFetch<{ position: PositionView }>(`/api/positions/${positionId}/close`, {
     method: "POST",
+  });
+}
+
+export function listOptions(status?: "open" | "settled") {
+  const q = status ? `?status=${status}` : "";
+  return apiFetch<{ options: OptionPositionView[] }>(`/api/options${q}`);
+}
+
+export function buyOption(body: {
+  stockUserId: string;
+  promiseId: string;
+  optionType: OptionType;
+  quantity: number;
+}) {
+  return apiFetch<{ option: OptionPositionView }>("/api/options", {
+    method: "POST",
+    body: JSON.stringify(body),
   });
 }
 

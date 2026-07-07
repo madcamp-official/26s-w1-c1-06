@@ -84,3 +84,13 @@ export function memeLabel(lateMinutes: number, isNoShow: boolean): string {
   if (lateMinutes <= 30) return MEME_LABELS.LATE_11_30;
   return MEME_LABELS.LATE_31_PLUS;
 }
+
+/** 레버리지 베팅 허용 배율 (S-05). */
+export const ALLOWED_MULTIPLIERS = [1, 3, 5, 10] as const;
+
+/**
+ * 정산 결과 이모지 리액션 화이트리스트 (S-09).
+ * 자유 텍스트 없음 — P-4 톤 가드레일을 구조로 보장. DB CHECK와 값 동일하게 유지.
+ */
+export const ALLOWED_REACTIONS = ["😱", "📉", "🛡️", "🔥"] as const;
+export type ReactionEmoji = (typeof ALLOWED_REACTIONS)[number];

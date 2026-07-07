@@ -13,6 +13,7 @@ import { positionsRouter, meRouter } from "./routes/positions.js";
 import { assetsRouter } from "./routes/assets.js";
 import { meStockRouter, stocksRouter } from "./routes/stock-chart.js";
 import { settlementInboxRouter } from "./routes/settlement-inbox.js";
+import { optionsRouter } from "./routes/options.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -54,6 +55,9 @@ export function createApp(): express.Express {
   // M1.2 포지션·자기주식 (F-10/F-11, F-17/F-18)
   app.use("/api/positions", positionsRouter);
   app.use("/api/me", meRouter);
+
+  // S-04 옵션 거래(콜/풋)
+  app.use("/api/options", optionsRouter);
 
   // M1.2-3 자산 화면 — 가용/잠금 포인트, 원장 (F-14 일부)
   app.use("/api/me", assetsRouter);

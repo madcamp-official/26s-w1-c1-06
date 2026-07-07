@@ -55,6 +55,7 @@ export function StockRankingTable({ friends, selectedId, onSelect }: StockRankin
               <th>종목</th>
               <th>현재가</th>
               <th>등락</th>
+              <th>스트릭</th>
               <th />
             </tr>
           </thead>
@@ -90,7 +91,12 @@ export function StockRankingTable({ friends, selectedId, onSelect }: StockRankin
                   <td>
                     <div className="trade-ranking__stock">
                       <span className="trade-ranking__avatar">{friend.nickname.slice(0, 1)}</span>
-                      <span>{friend.nickname}</span>
+                      <div>
+                        <div>{friend.nickname}</div>
+                        <div className="trade-ranking__risk">
+                          지각 위험도 {friend.lateRiskPct}%
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td className="trade-ranking__price">{friend.currentPrice.toLocaleString()}원</td>
@@ -100,6 +106,9 @@ export function StockRankingTable({ friends, selectedId, onSelect }: StockRankin
                   >
                     {isUp ? "+" : ""}
                     {pct}%
+                  </td>
+                  <td className="trade-ranking__streak">
+                    {friend.onTimeStreak > 0 ? `🔥 ${friend.onTimeStreak}` : "—"}
                   </td>
                   <td>
                     <button

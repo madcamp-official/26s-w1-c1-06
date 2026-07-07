@@ -3,12 +3,15 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AsyncState } from "../components/AsyncState";
 import { OpenPositionsPanel } from "../components/OpenPositionsPanel";
+import { OptionPositionsPanel } from "../components/OptionPositionsPanel";
 import { StockCandlestickChart } from "../components/StockCandlestickChart";
+import { OptionOrderPanel } from "../components/trade/OptionOrderPanel";
 import { OrderPanel } from "../components/trade/OrderPanel";
 import { StockRankingTable } from "../components/trade/StockRankingTable";
 import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAssets } from "../hooks/useAssets";
 import { useOpenPositions } from "../hooks/useOpenPositions";
+import { useOptions } from "../hooks/useOptions";
 import { usePolling } from "../hooks/usePolling";
 import { useStockChart } from "../hooks/useStockChart";
 import { useStockPromises } from "../hooks/useStockPromises";
@@ -28,6 +31,7 @@ export function AssetsScreen() {
   const friendChart = useStockChart(selectedFriend?.userId);
   const assets = useAssets();
   const openPositions = useOpenPositions();
+  const options = useOptions();
   const { promises, isLoading: promisesLoading } = useStockPromises(selectedFriend?.userId);
 
   const chart = selectedFriend ? friendChart : ownChart;
@@ -100,6 +104,13 @@ export function AssetsScreen() {
         }}
       />
 
+      <OptionPositionsPanel
+        options={options.options}
+        isLoading={options.isLoading}
+        error={options.error}
+        onRetry={options.reload}
+      />
+
       <AsyncState
         loading={assets.isLoading && ownChart.isLoading}
         error={assets.error ?? ownChart.error ?? friendsError}
@@ -152,16 +163,28 @@ export function AssetsScreen() {
             </section>
 
             {selectedFriend ? (
-              <OrderPanel
-                stock={selectedFriend}
-                promises={promises}
-                promisesLoading={promisesLoading}
-                availablePoints={assets.summary?.availablePoints ?? null}
-                onSuccess={() => {
-                  loadFriends();
-                  openPositions.reload();
-                }}
-              />
+              <div className="trade-dashboard__order-stack">
+                <OrderPanel
+                  stock={selectedFriend}
+                  promises={promises}
+                  promisesLoading={promisesLoading}
+                  availablePoints={assets.summary?.availablePoints ?? null}
+                  onSuccess={() => {
+                    loadFriends();
+                    openPositions.reload();
+                  }}
+                />
+                <OptionOrderPanel
+                  stock={selectedFriend}
+                  promises={promises}
+                  promisesLoading={promisesLoading}
+                  availablePoints={assets.summary?.availablePoints ?? null}
+                  onSuccess={() => {
+                    loadFriends();
+                    options.reload();
+                  }}
+                />
+              </div>
             ) : (
               <aside className="trade-order trade-order--placeholder">
                 <h3 className="trade-order__placeholder-title">주문</h3>

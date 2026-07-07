@@ -16,6 +16,7 @@ export function previewPositionScenarios(
   quantity: number,
   currentPrice: number,
   lateMinuteSamples: number[] = [0, 10, 32, 60],
+  multiplier: number = 1,
 ): PositionPreviewScenario[] {
   const locked = computeLockedPoints(quantity, currentPrice);
   const scenarios: PositionPreviewScenario[] = [];
@@ -32,6 +33,7 @@ export function previewPositionScenarios(
       currentPrice,
       onTimeAfter,
       locked,
+      multiplier,
     ),
   });
 
@@ -42,7 +44,7 @@ export function previewPositionScenarios(
       verdict: "late",
       lateMinutes: mins,
       priceAfter: after,
-      payout: computePayout(direction, quantity, currentPrice, after, locked),
+      payout: computePayout(direction, quantity, currentPrice, after, locked, multiplier),
     });
   }
 
@@ -58,6 +60,7 @@ export function previewPositionScenarios(
       currentPrice,
       noShowAfter,
       locked,
+      multiplier,
     ),
   });
 

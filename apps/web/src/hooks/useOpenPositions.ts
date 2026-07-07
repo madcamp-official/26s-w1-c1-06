@@ -37,6 +37,7 @@ export function useOpenPositions(): UseOpenPositionsResult {
               p.openPrice,
               currentPrice,
               p.lockedPoints,
+              p.multiplier,
             ),
           };
         });

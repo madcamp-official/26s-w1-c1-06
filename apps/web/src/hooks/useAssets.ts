@@ -8,7 +8,9 @@ export type TxType =
   | "position_payout"
   | "defense_reward"
   | "self_stock_buy"
-  | "self_stock_sell";
+  | "self_stock_sell"
+  | "option_premium"
+  | "option_payout";
 
 export interface AssetSummary {
   availablePoints: number;

@@ -13,6 +13,8 @@ export interface FriendView {
   userId: string;
   nickname: string;
   currentPrice: number;
+  onTimeStreak: number;
+  lateRiskPct: number;
 }
 
 export interface UserSearchResult {
@@ -169,6 +171,8 @@ export async function listFriends(userId: string): Promise<FriendView[]> {
     friend_id: string;
     nickname: string;
     current_price: number;
+    on_time_streak: number;
+    ewma_late_p: number;
   }>(
     `SELECT
        CASE
@@ -176,7 +180,9 @@ export async function listFriends(userId: string): Promise<FriendView[]> {
          ELSE f.requester_id
        END AS friend_id,
        u.nickname,
-       u.current_price
+       u.current_price,
+       u.on_time_streak,
+       u.ewma_late_p
      FROM friendships f
      JOIN users u ON u.id = CASE
        WHEN f.requester_id = $1::bigint THEN f.addressee_id
@@ -192,7 +198,55 @@ export async function listFriends(userId: string): Promise<FriendView[]> {
     userId: r.friend_id,
     nickname: r.nickname,
     currentPrice: r.current_price,
+    onTimeStreak: r.on_time_streak,
+    lateRiskPct: Math.round(r.ewma_late_p * 100),
   }));
+}
+
+export interface RankingEntryView {
+  userId: string;
+  nickname: string;
+  totalPayout: number;
+  totalLocked: number;
+  returnPct: number;
+}
+
+/** GET /me/rankings (S-06) — 내 친구 범위 한정, 절대 포인트가 아닌 수익률 기준. */
+export async function getFriendRanking(userId: string): Promise<RankingEntryView[]> {
+  const pool = getPool();
+  requirePool(pool);
+
+  const result = await pool.query<{
+    user_id: string;
+    nickname: string;
+    total_payout: number;
+    total_locked: number;
+  }>(
+    `SELECT u.id::text AS user_id, u.nickname,
+            COALESCE(SUM(p.payout), 0)::int AS total_payout,
+            COALESCE(SUM(p.locked_points), 0)::int AS total_locked
+     FROM (
+       SELECT $1::bigint AS id
+       UNION
+       SELECT CASE WHEN f.requester_id = $1::bigint THEN f.addressee_id ELSE f.requester_id END
+       FROM friendships f
+       WHERE f.status = 'accepted' AND $1::bigint IN (f.requester_id, f.addressee_id)
+     ) scope
+     JOIN users u ON u.id = scope.id
+     LEFT JOIN positions p ON p.investor_id = u.id AND p.status = 'settled'
+     GROUP BY u.id, u.nickname`,
+    [userId],
+  );
+
+  return result.rows
+    .map((r) => ({
+      userId: r.user_id,
+      nickname: r.nickname,
+      totalPayout: r.total_payout,
+      totalLocked: r.total_locked,
+      returnPct: r.total_locked === 0 ? 0 : (r.total_payout / r.total_locked) * 100,
+    }))
+    .sort((a, b) => b.returnPct - a.returnPct);
 }
 
 /** GET /users/search?q= */

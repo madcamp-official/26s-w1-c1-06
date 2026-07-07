@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
+import { apiFetch } from "../lib/api";
+import { usePolling } from "../hooks/usePolling";
 
 const TABS = [
   { to: "/home", label: "홈", icon: "🏠" },
@@ -6,10 +9,30 @@ const TABS = [
   { to: "/promises", label: "약속", icon: "📅" },
   { to: "/assets", label: "자산", icon: "💰" },
   { to: "/history", label: "내역", icon: "🧾" },
+  { to: "/notifications", label: "알림", icon: "🔔" },
   { to: "/demo", label: "데모", icon: "🧪" },
 ] as const;
 
+function useNotificationCount(): number {
+  const [count, setCount] = useState(0);
+
+  function load() {
+    apiFetch<{ totalCount: number }>("/api/me/notifications")
+      .then((r) => setCount(r.totalCount))
+      .catch(() => setCount(0));
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+  usePolling(load, 30000);
+
+  return count;
+}
+
 function NavItems({ className }: { className: string }) {
+  const notificationCount = useNotificationCount();
+
   return (
     <>
       {TABS.map((tab) => (
@@ -24,6 +47,9 @@ function NavItems({ className }: { className: string }) {
             {tab.icon}
           </span>
           <span>{tab.label}</span>
+          {tab.to === "/notifications" && notificationCount > 0 && (
+            <span className="tab-badge">{notificationCount}</span>
+          )}
         </NavLink>
       ))}
     </>

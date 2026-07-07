@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { AsyncState } from "../components/AsyncState";
+import { ReactionBar } from "../components/ReactionBar";
 import { SettlementHero } from "../components/SettlementHero";
 import { ShareCard } from "../components/ShareCard";
 import { useAuth } from "../context/AuthContext";
@@ -124,6 +125,7 @@ export function SettlementResultPage({ kind }: SettlementResultPageProps) {
             <div className="result-page__body">
               <PayoutDetails vm={data} />
               <StockDetails vm={data} />
+              <ReactionBar promiseId={data.promiseId} />
               <ShareCard vm={data} viewerNickname={user?.nickname ?? ""} />
             </div>
           </>

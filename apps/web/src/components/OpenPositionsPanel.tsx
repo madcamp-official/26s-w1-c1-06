@@ -67,6 +67,9 @@ export function OpenPositionsPanel({
         <ul className="open-positions__list">
           {positions.map((p) => {
             const isProfit = p.unrealizedPayout >= 0;
+            const isBeforeDeadline = new Date(p.promisedAt).getTime() > Date.now();
+            const actionLabel = isBeforeDeadline ? "취소" : "조기 청산";
+            const confirmLabel = isBeforeDeadline ? "정말 취소?" : "정말 청산?";
             return (
               <li key={p.id} className="open-positions__item">
                 <div className="open-positions__item-left">
@@ -106,7 +109,7 @@ export function OpenPositionsPanel({
                       disabled={closingId === p.id}
                       onClick={() => handleClose(p.id)}
                     >
-                      {closingId === p.id ? "처리 중..." : "정말 청산?"}
+                      {closingId === p.id ? "처리 중..." : confirmLabel}
                     </button>
                   ) : (
                     <button
@@ -114,7 +117,7 @@ export function OpenPositionsPanel({
                       className="open-positions__close-btn"
                       onClick={() => setConfirmingId(p.id)}
                     >
-                      조기 청산
+                      {actionLabel}
                     </button>
                   )}
                 </div>
