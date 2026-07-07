@@ -32,11 +32,6 @@ export function getCurrentPosition(): Promise<Coordinates> {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        console.log("[GEO-DEBUG]", {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-        });
         resolve({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,

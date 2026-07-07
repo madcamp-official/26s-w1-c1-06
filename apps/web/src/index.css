@@ -2271,3 +2271,35 @@ select {
   font-size: 0.85rem;
   color: #0051c7;
 }
+
+.modal-box--result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.modal-box--result .modal-box__header {
+  width: 100%;
+}
+
+.modal-box__result-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.modal-box__result-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.modal-box__result-distance {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.modal-box--result .btn {
+  margin-top: 8px;
+}
