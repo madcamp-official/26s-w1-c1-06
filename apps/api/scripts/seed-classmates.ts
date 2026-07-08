@@ -83,7 +83,9 @@ async function findUserByNickname(client: pg.PoolClient, nickname: string): Prom
 }
 
 async function ensureVirtualUser(client: pg.PoolClient, nickname: string): Promise<string> {
-  const email = `classmate.${encodeURIComponent(nickname)}@test.local`;
+  // 로그인 시 이메일을 toLowerCase()로 정규화해 조회한다(auth.ts) — encodeURIComponent가
+  // 대문자 hex(%EC%9D%B4 등)를 만들기 때문에 여기서도 미리 소문자로 맞춰야 로그인이 된다.
+  const email = `classmate.${encodeURIComponent(nickname)}@test.local`.toLowerCase();
   const existing = await client.query<{ id: string }>(`SELECT id::text FROM users WHERE email = $1`, [email]);
   if (existing.rows[0]) return existing.rows[0].id;
 
