@@ -17,6 +17,8 @@ export interface UserProfile {
   nickname: string;
   availablePoints: number;
   currentPrice: number;
+  equippedTitleKey: string | null;
+  equippedBadgeKey: string | null;
 }
 
 interface UserRow {
@@ -26,6 +28,8 @@ interface UserRow {
   password_hash: string | null;
   available_points: number;
   current_price: number;
+  equipped_title_key: string | null;
+  equipped_badge_key: string | null;
 }
 
 function mapProfile(row: Omit<UserRow, "password_hash">): UserProfile {
@@ -35,6 +39,8 @@ function mapProfile(row: Omit<UserRow, "password_hash">): UserProfile {
     nickname: row.nickname,
     availablePoints: row.available_points,
     currentPrice: row.current_price,
+    equippedTitleKey: row.equipped_title_key,
+    equippedBadgeKey: row.equipped_badge_key,
   };
 }
 
@@ -64,7 +70,8 @@ export async function signupUser(
     const inserted = await client.query<UserRow>(
       `INSERT INTO users (email, password_hash, nickname, available_points)
        VALUES ($1, $2, $3, 0)
-       RETURNING id, email, nickname, available_points, current_price`,
+       RETURNING id, email, nickname, available_points, current_price,
+                 equipped_title_key, equipped_badge_key`,
       [normalizedEmail, hash, nickname.trim()],
     );
     const user = inserted.rows[0];
@@ -108,7 +115,8 @@ export async function loginUser(
 
   const normalizedEmail = email.trim().toLowerCase();
   const result = await pool.query<UserRow>(
-    `SELECT id, email, nickname, password_hash, available_points, current_price
+    `SELECT id, email, nickname, password_hash, available_points, current_price,
+            equipped_title_key, equipped_badge_key
      FROM users WHERE email = $1`,
     [normalizedEmail],
   );
@@ -131,7 +139,8 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
   requirePool(pool);
 
   const result = await pool.query<UserRow>(
-    `SELECT id, email, nickname, password_hash, available_points, current_price
+    `SELECT id, email, nickname, password_hash, available_points, current_price,
+            equipped_title_key, equipped_badge_key
      FROM users WHERE id = $1`,
     [userId],
   );

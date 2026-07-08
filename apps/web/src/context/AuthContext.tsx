@@ -25,6 +25,8 @@ interface AuthContextValue {
     nickname: string,
   ) => Promise<void>;
   logout: () => void;
+  /** 상점 구매/장착처럼 서버에서 내 정보가 바뀐 뒤 최신 상태로 다시 받아온다. */
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -80,8 +82,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
+  async function refreshUser() {
+    const { user: fresh } = await apiFetch<{ user: AuthUser }>("/api/auth/me");
+    const token = getToken();
+    if (token) setAuth(token, fresh);
+    setUser(fresh);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, login, signup, logout, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

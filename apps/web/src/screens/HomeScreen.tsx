@@ -1,9 +1,11 @@
+import { findShopItem } from "@latestock/shared";
 import { Link } from "react-router-dom";
 import { AnimatedNumber } from "../components/AnimatedNumber";
 import { AutoSettlementReveal } from "../components/AutoSettlementReveal";
 import { FriendActivityFeed } from "../components/FriendActivityFeed";
 import { MarketSummaryCard } from "../components/MarketSummaryCard";
 import { RankingCard } from "../components/RankingCard";
+import { ShopBadgeIcon } from "../components/ShopBadgeIcon";
 import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAuth } from "../context/AuthContext";
 import { useAssets } from "../hooks/useAssets";
@@ -15,6 +17,8 @@ export function HomeScreen() {
   const { user, logout } = useAuth();
   const assets = useAssets();
   const unconfirmed = useUnconfirmedSettlements();
+  const equippedTitle = user?.equippedTitleKey ? findShopItem(user.equippedTitleKey) : undefined;
+  const equippedBadge = user?.equippedBadgeKey ? findShopItem(user.equippedBadgeKey) : undefined;
 
   usePolling(assets.reload, 25000);
   /**
@@ -49,7 +53,11 @@ export function HomeScreen() {
               format={(n) => `${Math.round(n).toLocaleString()}P`}
             />
           </p>
-          <p className="screen-header__sub">{user.nickname}님</p>
+          <p className="home-card__nickname">
+            {equippedBadge && <ShopBadgeIcon rarity={equippedBadge.rarity} size={20} />}
+            {user.nickname}님
+          </p>
+          {equippedTitle && <p className="home-card__title">{equippedTitle.label}</p>}
         </div>
       )}
 
@@ -68,6 +76,9 @@ export function HomeScreen() {
         </Link>
         <Link to="/friends" className="link-card">
           👥 친구·시장
+        </Link>
+        <Link to="/shop" className="link-card">
+          🎁 상점 구경하기
         </Link>
       </div>
 

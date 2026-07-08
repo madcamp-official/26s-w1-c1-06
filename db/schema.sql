@@ -21,7 +21,9 @@ CREATE TYPE tx_type         AS ENUM ('signup_grant',       -- F-09 가입 지급
                                      'self_stock_buy',     -- F-17 행사(음수)
                                      'self_stock_sell',    -- F-18 매도(양수)
                                      'option_premium',     -- S-04 프리미엄 지불(음수)
-                                     'option_payout');     -- S-04 행사 배당(양수, 실패 시 미기록)
+                                     'option_payout',      -- S-04 행사 배당(양수, 실패 시 미기록)
+                                     'shop_purchase');     -- 칭호·배지 상점 구매(음수)
+CREATE TYPE shop_item_type   AS ENUM ('title', 'badge');                            -- 상점 항목 종류
 
 -- ---------- users : 계정 + 종목(1:1 병합) + 지갑 ----------
 -- 주식은 가입 시 유저당 1개·전역 단일 가격(v7 R-3)이므로 별도 stock 테이블 없이 병합.
@@ -37,6 +39,8 @@ CREATE TABLE users (
     ewma_late_p       REAL NOT NULL DEFAULT 0.5 CHECK (ewma_late_p BETWEEN 0 AND 1), -- L-01 (α=0.25, p0=0.5). 정산 배치가 갱신
     on_time_streak    INT  NOT NULL DEFAULT 0 CHECK (on_time_streak >= 0),   -- [2차 S-01/I-4] 연속 정시 카운트
     auto_accept_invites BOOLEAN NOT NULL DEFAULT false,        -- 데모/시드용 가상 계정 전용. 실제 유저는 항상 false(F-19 수동 응답 유지)
+    equipped_title_key  VARCHAR(50),                           -- 상점에서 구매한 칭호 중 장착한 것(shop.ts SHOP_TITLES 키). NULL=미장착
+    equipped_badge_key  VARCHAR(50),                           -- 상점에서 구매한 배지 중 장착한 것(shop.ts SHOP_BADGES 키). NULL=미장착
     created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
     CHECK (provider = 'email' OR provider_id IS NOT NULL)    -- 소셜 계정은 provider_id 필수
 );
@@ -225,5 +229,19 @@ CREATE TABLE reactions (
     UNIQUE (promise_id, user_id)                                -- 1인 1약속 1이모지(재반응은 갱신)
 );
 CREATE INDEX idx_reactions_promise ON reactions (promise_id);
+
+-- ---------- shop_purchases : 칭호·배지 상점 구매 내역(=보유 목록) ----------
+-- 카탈로그(가격·등급)는 DB가 아니라 @latestock/shared SHOP_TITLES/SHOP_BADGES 상수가 원본.
+-- item_key로 그 상수 배열의 항목을 참조. 장착 상태는 users.equipped_title_key/equipped_badge_key.
+CREATE TABLE shop_purchases (
+    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id      BIGINT NOT NULL REFERENCES users(id),
+    item_key     VARCHAR(50) NOT NULL,
+    item_type    shop_item_type NOT NULL,
+    price_paid   INT NOT NULL CHECK (price_paid > 0),
+    purchased_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (user_id, item_key)                                  -- 같은 항목 중복 구매 방지
+);
+CREATE INDEX idx_shop_purchases_user ON shop_purchases (user_id);
 
 COMMIT;

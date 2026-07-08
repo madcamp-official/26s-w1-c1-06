@@ -28,10 +28,17 @@ export type TxType =
   | "self_stock_buy"
   | "self_stock_sell"
   | "option_premium"
-  | "option_payout";
+  | "option_payout"
+  | "shop_purchase";
 
 /** schema.sql option_type ENUM (S-04). */
 export type OptionType = "call" | "put";
+
+/** schema.sql shop_item_type ENUM (칭호·배지 상점). */
+export type ShopItemType = "title" | "badge";
+
+/** 상점 항목 등급 — 가격·비주얼(ShopBadgeIcon) 톤을 함께 결정. */
+export type ShopRarity = "rare" | "epic" | "legendary" | "mythic";
 
 /** 위경도 좌표 (도 단위). */
 export interface LatLng {

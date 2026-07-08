@@ -1,4 +1,11 @@
-import type { InviteStatus, OptionType, PositionDirection, Verdict } from "@latestock/shared";
+import type {
+  InviteStatus,
+  OptionType,
+  PositionDirection,
+  ShopItemType,
+  ShopRarity,
+  Verdict,
+} from "@latestock/shared";
 
 export interface PositionView {
   id: string;
@@ -106,6 +113,22 @@ export interface UserSearchResult {
   id: string;
   nickname: string;
   email: string;
+}
+
+export interface ShopCatalogItemView {
+  key: string;
+  label: string;
+  type: ShopItemType;
+  rarity: ShopRarity;
+  price: number;
+  owned: boolean;
+  equipped: boolean;
+}
+
+export interface ShopStateView {
+  items: ShopCatalogItemView[];
+  equippedTitleKey: string | null;
+  equippedBadgeKey: string | null;
 }
 
 export interface RankingEntryView {

@@ -13,6 +13,7 @@ import { PromiseCreateScreen } from "./screens/PromiseCreateScreen";
 import { PromiseDetailScreen } from "./screens/PromiseDetailScreen";
 import { PromisesScreen } from "./screens/PromisesScreen";
 import { SettlementResultPage } from "./screens/SettlementResultPage";
+import { ShopScreen } from "./screens/ShopScreen";
 import { SignupScreen } from "./screens/SignupScreen";
 
 export function App() {
@@ -44,6 +45,7 @@ export function App() {
         <Route path="friends/:userId" element={<FriendDetailScreen />} />
         <Route path="promises/new" element={<PromiseCreateScreen />} />
         <Route path="promises/:id" element={<PromiseDetailScreen />} />
+        <Route path="shop" element={<ShopScreen />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,10 +1,11 @@
-import { BASE_STOCK_PRICE } from "@latestock/shared";
+import { BASE_STOCK_PRICE, findShopItem } from "@latestock/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AddFriendModal } from "../components/AddFriendModal";
 import { AnimatedNumber } from "../components/AnimatedNumber";
 import { AsyncState } from "../components/AsyncState";
 import { EtfRecommendationsSection } from "../components/EtfRecommendationsSection";
+import { ShopBadgeIcon } from "../components/ShopBadgeIcon";
 import { StockCandlestickChart } from "../components/StockCandlestickChart";
 import { EtfBasketBuilder } from "../components/trade/EtfBasketBuilder";
 import { OptionOrderPanel } from "../components/trade/OptionOrderPanel";
@@ -64,6 +65,8 @@ export function FriendsMarketScreen() {
 
   const priceDiff = selected ? selected.currentPrice - BASE_STOCK_PRICE : 0;
   const isUp = priceDiff >= 0;
+  const equippedBadge = user?.equippedBadgeKey ? findShopItem(user.equippedBadgeKey) : undefined;
+  const equippedTitle = user?.equippedTitleKey ? findShopItem(user.equippedTitleKey) : undefined;
 
   return (
     <div className="trade-dashboard trade-dashboard--market">
@@ -75,7 +78,13 @@ export function FriendsMarketScreen() {
         <div className="trade-dashboard__topbar-right">
           {user && (
             <div className="trade-dashboard__user">
-              <span>{user.nickname}</span>
+              {equippedBadge && <ShopBadgeIcon rarity={equippedBadge.rarity} size={18} />}
+              <span>
+                {user.nickname}
+                {equippedTitle && (
+                  <span className="trade-dashboard__user-title"> · {equippedTitle.label}</span>
+                )}
+              </span>
             </div>
           )}
           {availablePoints != null && (
