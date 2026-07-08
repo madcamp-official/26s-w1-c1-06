@@ -1,6 +1,8 @@
 import { Router } from "express";
+import { requireAuth } from "../auth/middleware.js";
 import { env } from "../env.js";
 import { runSettlementNow } from "../settlement/scheduler.js";
+import { seedAllNotificationTypes } from "../services/demo-notifications.js";
 
 export const demoRouter = Router();
 
@@ -34,6 +36,25 @@ demoRouter.post("/settle", async (req, res) => {
       return;
     }
     res.json({ ok: true, ...result });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
+  }
+});
+
+/**
+ * F-16 데모: 알림함(S-07)의 4종류(정산 확인 2종·친구요청·약속초대)를 로그인한 유저 앞으로
+ * 한 번에 만들어 알림 UI를 시연할 수 있게 한다. 비프로덕션 또는 DEMO_MODE=true 에서만 허용.
+ */
+demoRouter.post("/seed-notifications", requireAuth, async (req, res) => {
+  if (env.isProd && process.env.DEMO_MODE !== "true") {
+    res.status(403).json({ error: "데모 기능은 비프로덕션 환경에서만 사용 가능합니다." });
+    return;
+  }
+
+  try {
+    await seedAllNotificationTypes(req.user!.id);
+    res.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     res.status(500).json({ error: message });
