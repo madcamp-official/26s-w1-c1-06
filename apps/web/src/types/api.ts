@@ -102,6 +102,12 @@ export interface FriendView {
   lateRiskPct: number;
 }
 
+export interface UserSearchResult {
+  id: string;
+  nickname: string;
+  email: string;
+}
+
 export interface RankingEntryView {
   userId: string;
   nickname: string;

@@ -3151,6 +3151,63 @@ select {
   gap: 12px;
 }
 
+.modal-box--add-friend {
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.add-friend__search {
+  width: 100%;
+}
+
+.add-friend__results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.add-friend__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--kakao-gray-100, #f0f0f0);
+}
+
+.add-friend__row-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.add-friend__row-nickname {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.add-friend__row-email {
+  font-size: 0.75rem;
+  color: var(--kakao-gray-500);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-friend__row-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.add-friend__row-error {
+  flex-basis: 100%;
+}
+
 .etf-builder__friends {
   display: flex;
   flex-wrap: wrap;
