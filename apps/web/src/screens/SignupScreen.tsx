@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthField, AuthLayout, AuthLink } from "../components/AuthLayout";
+import { ClassmateLoginHelper } from "../components/ClassmateLoginHelper";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../lib/api";
 
@@ -79,6 +80,8 @@ export function SignupScreen() {
           {isSubmitting ? "가입 중..." : "회원가입"}
         </button>
       </form>
+
+      <ClassmateLoginHelper />
     </AuthLayout>
   );
 }

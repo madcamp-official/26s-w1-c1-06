@@ -1662,6 +1662,65 @@ select {
   color: #bbb;
 }
 
+.classmate-helper {
+  margin-top: 16px;
+}
+
+.classmate-helper__toggle {
+  border: none;
+  background: none;
+  color: var(--kakao-gray-500);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.classmate-helper__panel {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--kakao-gray-100);
+}
+
+.classmate-helper__input {
+  width: 100%;
+  border: 1px solid var(--kakao-gray-200);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #fff;
+  font-size: 0.9rem;
+}
+
+.classmate-helper__hint {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--kakao-gray-500);
+}
+
+.classmate-helper__result {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--kakao-gray-200);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.classmate-helper__result-label {
+  display: inline-block;
+  min-width: 60px;
+  font-weight: 700;
+  color: var(--kakao-gray-500);
+}
+
+.classmate-helper__result .btn {
+  margin-top: 6px;
+  align-self: flex-start;
+}
+
 /* Narrow: stack brand above form */
 @media (max-width: 860px) {
   .auth-page {
