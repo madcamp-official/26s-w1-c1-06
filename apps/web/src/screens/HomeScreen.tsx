@@ -3,6 +3,7 @@ import { AnimatedNumber } from "../components/AnimatedNumber";
 import { AutoSettlementReveal } from "../components/AutoSettlementReveal";
 import { FriendActivityFeed } from "../components/FriendActivityFeed";
 import { MarketSummaryCard } from "../components/MarketSummaryCard";
+import { OnboardingFlow } from "../components/OnboardingFlow";
 import { RankingCard } from "../components/RankingCard";
 import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAuth } from "../context/AuthContext";
@@ -34,6 +35,8 @@ export function HomeScreen() {
       </header>
 
       <UnconfirmedSettlementsBanner data={unconfirmed.data} />
+
+      <OnboardingFlow />
 
       {user && (
         <div className="home-card">
