@@ -58,3 +58,22 @@ export function aggregateDailyCandles(points: ChartPoint[]): DailyCandle[] {
 
   return candles;
 }
+
+export interface MovingAveragePoint {
+  time: string;
+  value: number;
+}
+
+/** 실제 집계된 종가 기준 단순이동평균(SMA). 데이터가 period보다 적은 구간은 만들지 않는다. */
+export function computeSMA(candles: DailyCandle[], period: number): MovingAveragePoint[] {
+  const result: MovingAveragePoint[] = [];
+  let windowSum = 0;
+  for (let i = 0; i < candles.length; i++) {
+    windowSum += candles[i]!.close;
+    if (i >= period) windowSum -= candles[i - period]!.close;
+    if (i >= period - 1) {
+      result.push({ time: candles[i]!.time, value: windowSum / period });
+    }
+  }
+  return result;
+}

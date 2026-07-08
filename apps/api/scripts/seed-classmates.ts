@@ -2,14 +2,20 @@
  * 분반 멤버 실명으로 더미 친구 + 차트 이력 생성.
  *
  * - 대상(target) 계정이 이미 만들어둔 "Test1" 약속의 장소(place_name/lat/lng)를 그대로 재사용한다.
- * - 멤버를 정시파/지각파/들쭉날쭉 세 그룹으로 나눠 각자 다른 체크인 패턴의 과거 약속 8개씩을 만들고,
+ * - 멤버를 정시파/지각파/들쭉날쭉 세 그룹으로 나눠 각자 다른 체크인 성향의 과거 약속을
+ *   친구당 EVENTS_PER_FRIEND개(1~3일 간격, 약 2~3개월 분산) 절차적으로 생성하고,
  *   실제 정산 엔진(runSettlementNow)으로 정산해 차트에 바로 그래프가 뜨게 한다.
+ *   (캔들 차트가 일별 집계라 이벤트가 며칠에 몰리면 봉이 몇 개 안 남는 문제를
+ *   피하려고 넓게 분산시킨다 — 가격은 여전히 이 실제 판정 결과로만 움직인다.)
  * - 계정은 전부 auto_accept_invites=true 가상 계정(test.local 이메일)이라 실제 멤버가 로그인할 필요 없다.
  *
  * 사용: npx tsx scripts/seed-classmates.ts --target "허서준1"
  *
  * 전제: target 계정으로 "Test1"이라는 제목의 약속을 실제 사이트에서 이미 하나 만들어뒀어야 한다
  *      (그 약속의 장소 좌표를 그대로 복사해서 씀).
+ *
+ * 주의: 재실행하면 기존 약속 위에 새 약속이 추가로 쌓인다(멱등적이지 않음). 계정/친구관계만
+ *      멱등적으로 재사용된다.
  */
 import "../src/load-env.js";
 import { INITIAL_POINTS, NO_SHOW_MINUTES } from "@latestock/shared";
@@ -41,33 +47,45 @@ const MEMBERS: { nickname: string; profile: Profile }[] = [
   { nickname: "주성민", profile: "mixed" },
 ];
 
-/** null = 노쇼(체크인 없음), 숫자 = 그만큼 지각(0 = 정시). 배열 앞쪽이 더 과거 시점. */
-const PROFILE_SCENARIOS: Record<Profile, (number | null)[][]> = {
-  punctual: [
-    [0, 0, 5, 0, 0, 10, 0, 0],
-    [0, 5, 0, 0, 0, 8, 0, 3],
-    [5, 0, 0, 10, 0, 0, 0, 0],
-    [0, 0, 0, 5, 0, 0, 12, 0],
-    [0, 8, 0, 0, 5, 0, 0, 0],
-  ],
-  late: [
-    [45, null, 30, 50, null, 40, 55, 35],
-    [null, 40, 50, 35, null, 45, 30, null],
-    [50, 35, null, 45, 40, null, 55, 30],
-    [40, null, 45, 30, 50, 35, null, 40],
-    [null, 50, 35, 40, null, 45, 30, 55],
-  ],
-  mixed: [
-    [0, 45, 10, null, 0, 30, 5, 50],
-    [5, 0, null, 20, 0, 40, 0, 10],
-    [0, 30, 0, null, 15, 0, 45, 0],
-    [10, 0, 40, 0, null, 5, 0, 25],
-    [0, null, 5, 30, 0, 15, 0, null],
-  ],
-};
-
-const HOURS_BETWEEN = 6;
+/** 친구 1명당 만들 과거 약속 개수(1~3일 간격이면 약 2~3개월에 걸쳐 분산됨). */
+const EVENTS_PER_FRIEND = 45;
+const DAY_GAP_MIN = 1;
+const DAY_GAP_MAX = 3;
 const DEFAULT_PASSWORD = "password12";
+
+/** null = 노쇼(체크인 없음), 숫자 = 그만큼 지각(0 = 정시). 성향별 확률 분포로 매번 새로 뽑는다. */
+function randomLateMinutes(profile: Profile): number | null {
+  const r = Math.random();
+  if (profile === "punctual") {
+    if (r < 0.75) return 0;
+    if (r < 0.95) return Math.round(5 + Math.random() * 15);
+    return null;
+  }
+  if (profile === "late") {
+    if (r < 0.1) return 0;
+    if (r < 0.25) return null;
+    return Math.round(25 + Math.random() * 40);
+  }
+  // mixed
+  if (r < 0.35) return 0;
+  if (r < 0.55) return null;
+  return Math.round(10 + Math.random() * 45);
+}
+
+/** count개 약속을 1~3일 랜덤 간격으로 과거→최근(마지막은 약 1일 전) 순서로 배치한 시각 배열. */
+function buildSchedule(count: number): Date[] {
+  const gaps = Array.from(
+    { length: count },
+    () => DAY_GAP_MIN + Math.random() * (DAY_GAP_MAX - DAY_GAP_MIN),
+  );
+  const offsetsFromNowDays: number[] = new Array(count);
+  let acc = 1;
+  for (let i = count - 1; i >= 0; i--) {
+    offsetsFromNowDays[i] = acc;
+    acc += gaps[i]!;
+  }
+  return offsetsFromNowDays.map((days) => new Date(Date.now() - days * 24 * 60 * 60 * 1000));
+}
 
 interface UserRow {
   id: string;
@@ -154,21 +172,18 @@ async function main(): Promise<void> {
     }
     console.log(`장소: ${testPlace.place_name} (${testPlace.latitude}, ${testPlace.longitude})`);
 
-    const profileCounters: Record<Profile, number> = { punctual: 0, late: 0, mixed: 0 };
     let created = 0;
 
     for (const member of MEMBERS) {
       const friendId = await ensureVirtualUser(client, member.nickname);
       await ensureFriendship(client, target.id, friendId);
 
-      const scenarioSet = PROFILE_SCENARIOS[member.profile];
-      const scenario = scenarioSet[profileCounters[member.profile] % scenarioSet.length]!;
-      profileCounters[member.profile] += 1;
+      const schedule = buildSchedule(EVENTS_PER_FRIEND);
 
       await client.query("BEGIN");
-      for (let i = 0; i < scenario.length; i++) {
-        const lateMinutes = scenario[i]!;
-        const promisedAt = new Date(Date.now() - (scenario.length - i) * HOURS_BETWEEN * 60 * 60 * 1000);
+      for (let i = 0; i < schedule.length; i++) {
+        const lateMinutes = randomLateMinutes(member.profile);
+        const promisedAt = schedule[i]!;
         const settleDueAt = new Date(promisedAt.getTime() + NO_SHOW_MINUTES * 60_000);
 
         const inserted = await client.query<{ id: string }>(
@@ -202,7 +217,7 @@ async function main(): Promise<void> {
         created += 1;
       }
       await client.query("COMMIT");
-      console.log(`${member.nickname} (${member.profile}): 약속 ${scenario.length}개 생성`);
+      console.log(`${member.nickname} (${member.profile}): 약속 ${schedule.length}개 생성`);
     }
 
     console.log(`\n총 ${created}개 약속 생성. 정산 실행 중...`);
