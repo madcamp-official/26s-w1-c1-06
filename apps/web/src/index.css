@@ -2903,6 +2903,13 @@ select {
   margin-top: 8px;
 }
 
+.shop-card__locked-hint {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: var(--kakao-gray-500);
+  text-align: center;
+}
+
 .promises-list {
   list-style: none;
   margin: 0;
@@ -3220,6 +3227,27 @@ select {
   color: var(--kakao-gray-900);
   font-weight: 800;
   font-size: 0.75rem;
+}
+
+.promise-invite-chip__rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.promise-invite-chip__rank--gap {
+  background: #d60000;
+}
+
+.promise-invite-chip__rank--eul {
+  background: #4b5563;
 }
 
 .promise-sticky-bar {

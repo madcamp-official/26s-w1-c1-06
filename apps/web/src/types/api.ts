@@ -107,6 +107,7 @@ export interface FriendView {
   currentPrice: number;
   onTimeStreak: number;
   lateRiskPct: number;
+  equippedBadgeKey: string | null;
 }
 
 export interface UserSearchResult {
@@ -128,6 +129,7 @@ export interface ShopCatalogItemView {
   type: ShopItemType;
   rarity: ShopRarity;
   price: number;
+  tier?: number;
   owned: boolean;
   equipped: boolean;
 }

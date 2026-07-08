@@ -1,4 +1,4 @@
-import { findShopItem, SHOP_ITEMS, type ShopItemType } from "@latestock/shared";
+import { findShopItem, SHOP_BADGES, SHOP_ITEMS, type ShopItemType } from "@latestock/shared";
 import { getPool } from "../db/pool.js";
 import { HttpError, requirePool } from "../lib/errors.js";
 
@@ -8,6 +8,7 @@ export interface ShopCatalogItemView {
   type: ShopItemType;
   rarity: string;
   price: number;
+  tier?: number;
   owned: boolean;
   equipped: boolean;
 }
@@ -44,6 +45,7 @@ export async function getShopState(userId: string): Promise<ShopStateView> {
     type: def.type,
     rarity: def.rarity,
     price: def.price,
+    tier: def.tier,
     owned: ownedKeys.has(def.key),
     equipped:
       def.type === "title"
@@ -72,6 +74,19 @@ export async function purchaseShopItem(
 
   try {
     await client.query("BEGIN");
+
+    if (item.type === "badge" && item.tier !== undefined && item.tier > 1) {
+      const prevBadge = SHOP_BADGES.find((b) => b.tier === item.tier! - 1);
+      if (prevBadge) {
+        const prevOwned = await client.query(
+          `SELECT 1 FROM shop_purchases WHERE user_id = $1 AND item_key = $2`,
+          [userId, prevBadge.key],
+        );
+        if ((prevOwned.rowCount ?? 0) === 0) {
+          throw new HttpError(400, `먼저 '${prevBadge.label}' 배지를 구매해야 합니다.`);
+        }
+      }
+    }
 
     const userResult = await client.query<{ available_points: number }>(
       `SELECT available_points FROM users WHERE id = $1 FOR UPDATE`,
