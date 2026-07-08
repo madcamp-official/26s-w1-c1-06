@@ -3579,6 +3579,62 @@ select {
   color: #777;
 }
 
+.incoming-requests {
+  padding: 16px 24px;
+  background: #141414;
+  border-top: 1px solid #222;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.incoming-requests__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.incoming-requests__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.incoming-requests__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  background: #1c1c1c;
+  border: 1px solid #262626;
+  border-radius: 12px;
+}
+
+.incoming-requests__nickname {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.incoming-requests__actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.incoming-requests__btn {
+  white-space: nowrap;
+}
+
+.incoming-requests__error {
+  margin: 0;
+  flex-basis: 100%;
+  font-size: 0.8rem;
+  color: #ff6b6b;
+}
+
 /* 첫 방문 튜토리얼 모달 (Framer Motion으로 애니메이션, 여긴 레이아웃만) */
 .tutorial-backdrop {
   position: fixed;

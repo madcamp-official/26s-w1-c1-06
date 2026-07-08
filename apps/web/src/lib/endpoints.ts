@@ -8,6 +8,7 @@ import type {
   EtfBasketView,
   EtfRecommendationView,
   FriendActivityItem,
+  FriendRequestView,
   FriendView,
   OptionPositionView,
   PositionView,
@@ -33,6 +34,22 @@ export function sendFriendRequest(addresseeId: string) {
   return apiFetch<{ id: string }>("/api/friends/requests", {
     method: "POST",
     body: JSON.stringify({ addresseeId }),
+  });
+}
+
+export function listIncomingFriendRequests() {
+  return apiFetch<{ requests: FriendRequestView[] }>("/api/friends/requests");
+}
+
+export function acceptFriendRequest(requestId: string) {
+  return apiFetch<{ ok: true }>(`/api/friends/requests/${requestId}/accept`, {
+    method: "POST",
+  });
+}
+
+export function rejectFriendRequest(requestId: string) {
+  return apiFetch<{ ok: true }>(`/api/friends/requests/${requestId}/reject`, {
+    method: "POST",
   });
 }
 

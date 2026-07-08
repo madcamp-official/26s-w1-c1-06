@@ -5,6 +5,7 @@ import { AddFriendModal } from "../components/AddFriendModal";
 import { AnimatedNumber } from "../components/AnimatedNumber";
 import { AsyncState } from "../components/AsyncState";
 import { EtfRecommendationsSection } from "../components/EtfRecommendationsSection";
+import { IncomingFriendRequests } from "../components/IncomingFriendRequests";
 import { ShopBadgeIcon } from "../components/ShopBadgeIcon";
 import { StockCandlestickChart } from "../components/StockCandlestickChart";
 import { EtfBasketBuilder } from "../components/trade/EtfBasketBuilder";
@@ -109,6 +110,8 @@ export function FriendsMarketScreen() {
           </button>
         </div>
       </header>
+
+      <IncomingFriendRequests onSuccess={loadMarket} />
 
       <EtfRecommendationsSection onSuccess={loadMarket} />
 
