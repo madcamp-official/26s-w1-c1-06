@@ -4,6 +4,8 @@ export interface AuthUser {
   nickname: string;
   availablePoints: number;
   currentPrice: number;
+  equippedTitleKey: string | null;
+  equippedBadgeKey: string | null;
 }
 
 const TOKEN_KEY = "latestock_token";

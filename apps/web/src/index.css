@@ -63,6 +63,18 @@ select {
   font-size: 1.05rem;
 }
 
+.screen-header__back {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--kakao-gray-500);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.screen-header__back:hover {
+  text-decoration: underline;
+}
+
 /* Tab bar — KakaoTalk (mobile) + sidebar (web) */
 .tab-layout {
   display: flex;
@@ -1049,6 +1061,22 @@ select {
   margin: 6px 0 0;
 }
 
+.home-card__nickname {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--kakao-gray-500);
+  font-size: 1.05rem;
+}
+
+.home-card__title {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #b45309;
+}
+
 .home-links {
   display: flex;
   flex-direction: column;
@@ -1710,8 +1738,16 @@ select {
 }
 
 .trade-dashboard__user {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.85rem;
   color: #666;
+}
+
+.trade-dashboard__user-title {
+  color: #d4a017;
+  font-weight: 600;
 }
 
 .trade-dashboard__balance--muted strong {
@@ -2735,6 +2771,89 @@ select {
   background: #fff;
   color: var(--kakao-gray-900);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.shop-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--kakao-gray-100);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.shop-tabs__item {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--kakao-gray-500);
+  cursor: pointer;
+}
+
+.shop-tabs__item--active {
+  background: #fff;
+  color: var(--kakao-gray-900);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.shop-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 12px 16px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.shop-card--rare {
+  background: linear-gradient(180deg, #eff6ff 0%, #fff 60%);
+}
+
+.shop-card--epic {
+  background: linear-gradient(180deg, #f5f0ff 0%, #fff 60%);
+}
+
+.shop-card--legendary {
+  background: linear-gradient(180deg, #fffbeb 0%, #fff 60%);
+}
+
+.shop-card--mythic {
+  background: linear-gradient(180deg, #fdf2f8 0%, #fff 60%);
+}
+
+.shop-card__label {
+  margin: 4px 0 0;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.shop-card__rarity {
+  font-size: 0.7rem;
+  color: var(--kakao-gray-500);
+  font-weight: 600;
+}
+
+.shop-card__price {
+  font-size: 0.95rem;
+  margin-top: 2px;
+}
+
+.shop-card__btn {
+  width: 100%;
+  margin-top: 8px;
 }
 
 .promises-list {

@@ -15,6 +15,7 @@ import { meStockRouter, stocksRouter } from "./routes/stock-chart.js";
 import { settlementInboxRouter } from "./routes/settlement-inbox.js";
 import { optionsRouter } from "./routes/options.js";
 import { etfRouter } from "./routes/etf.js";
+import { shopRouter } from "./routes/shop.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -72,6 +73,9 @@ export function createApp(): express.Express {
 
   // M1.3 미확인 정산 배너 (F-12)
   app.use("/api/me", settlementInboxRouter);
+
+  // 칭호·배지 상점 — 순수 과시용 포인트 소비처
+  app.use("/api/shop", shopRouter);
 
   return app;
 }

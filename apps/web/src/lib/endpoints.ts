@@ -1,4 +1,4 @@
-import type { OptionType } from "@latestock/shared";
+import type { OptionType, ShopItemType } from "@latestock/shared";
 import { apiFetch } from "./api";
 import type {
   BettablePromiseView,
@@ -14,6 +14,7 @@ import type {
   PromiseParticipantsView,
   PromiseView,
   RankingEntryView,
+  ShopStateView,
   UnconfirmedSettlements,
   UserSearchResult,
 } from "../types/api";
@@ -202,4 +203,22 @@ export async function confirmSettlement(
   } catch (err) {
     console.warn("정산 확인 처리 실패:", err);
   }
+}
+
+export function getShopState() {
+  return apiFetch<ShopStateView>("/api/shop");
+}
+
+export function purchaseShopItem(itemKey: string) {
+  return apiFetch<{ ok: true }>("/api/shop/purchase", {
+    method: "POST",
+    body: JSON.stringify({ itemKey }),
+  });
+}
+
+export function equipShopItem(itemType: ShopItemType, itemKey: string | null) {
+  return apiFetch<{ ok: true }>("/api/shop/equip", {
+    method: "POST",
+    body: JSON.stringify({ itemType, itemKey }),
+  });
 }
