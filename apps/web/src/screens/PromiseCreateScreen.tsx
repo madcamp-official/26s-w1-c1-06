@@ -1,9 +1,11 @@
+import { findShopItem } from "@latestock/shared";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { InlineToast } from "../components/InlineToast";
 import { PlacePickerMap } from "../components/PlacePickerMap";
 import { PlaceSearchBox, type PlaceSearchResult } from "../components/PlaceSearchBox";
 import { RippleButton } from "../components/RippleButton";
+import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../lib/api";
 import {
   datetimeLocalToIso,
@@ -41,6 +43,12 @@ function reverseGeocode(
   });
 }
 
+/** 배지 미보유(장착 안 함)는 계급 0(민간인 취급)으로 본다. */
+function badgeTierOf(equippedBadgeKey: string | null | undefined): number {
+  if (!equippedBadgeKey) return 0;
+  return findShopItem(equippedBadgeKey)?.tier ?? 0;
+}
+
 function formatPromisedAtDisplay(value: string): string {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "미정";
@@ -54,6 +62,8 @@ function formatPromisedAtDisplay(value: string): string {
 
 export function PromiseCreateScreen() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const myBadgeTier = badgeTierOf(user?.equippedBadgeKey);
 
   const [title, setTitle] = useState("");
   const [placeName, setPlaceName] = useState("");
@@ -252,6 +262,9 @@ export function PromiseCreateScreen() {
               <div className="promise-invite-grid">
                 {friends.map((f) => {
                   const selected = inviteIds.has(f.userId);
+                  const friendBadgeTier = badgeTierOf(f.equippedBadgeKey);
+                  const rankTag =
+                    friendBadgeTier === myBadgeTier ? null : friendBadgeTier > myBadgeTier ? "갑" : "을";
                   return (
                     <button
                       key={f.userId}
@@ -261,6 +274,13 @@ export function PromiseCreateScreen() {
                     >
                       <span className="promise-invite-chip__avatar">{f.nickname.slice(0, 1)}</span>
                       <span>{f.nickname}</span>
+                      {rankTag && (
+                        <span
+                          className={`promise-invite-chip__rank promise-invite-chip__rank--${rankTag === "갑" ? "gap" : "eul"}`}
+                        >
+                          {rankTag}
+                        </span>
+                      )}
                     </button>
                   );
                 })}

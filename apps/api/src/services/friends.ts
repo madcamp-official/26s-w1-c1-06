@@ -16,6 +16,7 @@ export interface FriendView {
   currentPrice: number;
   onTimeStreak: number;
   lateRiskPct: number;
+  equippedBadgeKey: string | null;
 }
 
 export interface UserSearchResult {
@@ -174,6 +175,7 @@ export async function listFriends(userId: string): Promise<FriendView[]> {
     current_price: number;
     on_time_streak: number;
     ewma_late_p: number;
+    equipped_badge_key: string | null;
   }>(
     `SELECT
        CASE
@@ -183,7 +185,8 @@ export async function listFriends(userId: string): Promise<FriendView[]> {
        u.nickname,
        u.current_price,
        u.on_time_streak,
-       u.ewma_late_p
+       u.ewma_late_p,
+       u.equipped_badge_key
      FROM friendships f
      JOIN users u ON u.id = CASE
        WHEN f.requester_id = $1::bigint THEN f.addressee_id
@@ -201,6 +204,7 @@ export async function listFriends(userId: string): Promise<FriendView[]> {
     currentPrice: r.current_price,
     onTimeStreak: r.on_time_streak,
     lateRiskPct: Math.round(r.ewma_late_p * 100),
+    equippedBadgeKey: r.equipped_badge_key,
   }));
 }
 

@@ -79,7 +79,7 @@ export function FriendsMarketScreen() {
         <div className="trade-dashboard__topbar-right">
           {user && (
             <div className="trade-dashboard__user">
-              {equippedBadge && <ShopBadgeIcon rarity={equippedBadge.rarity} size={18} />}
+              {equippedBadge && <ShopBadgeIcon item={equippedBadge} size={18} />}
               <span>
                 {user.nickname}
                 {equippedTitle && (

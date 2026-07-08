@@ -71,6 +71,17 @@ export function ShopScreen() {
 
   const items = state?.items.filter((i) => i.type === tab) ?? [];
 
+  function lockedReason(item: ShopCatalogItemView): string | null {
+    if (item.type !== "badge" || item.owned || item.tier === undefined || item.tier <= 1) {
+      return null;
+    }
+    const prevBadge = state?.items.find((i) => i.type === "badge" && i.tier === item.tier! - 1);
+    if (prevBadge && !prevBadge.owned) {
+      return `먼저 '${prevBadge.label}'을(를) 구매하세요`;
+    }
+    return null;
+  }
+
   return (
     <div className="screen">
       <header className="screen-header">
@@ -115,9 +126,10 @@ export function ShopScreen() {
         <div className="shop-grid">
           {items.map((item) => {
             const isPending = pendingKey === item.key;
+            const locked = lockedReason(item);
             return (
               <div key={item.key} className={`shop-card shop-card--${item.rarity}`}>
-                <ShopBadgeIcon rarity={item.rarity} size={56} />
+                <ShopBadgeIcon item={item} size={56} />
                 <p className="shop-card__label">{item.label}</p>
                 <span className="shop-card__rarity">{RARITY_LABEL[item.rarity]}</span>
                 <strong className="shop-card__price">{item.price.toLocaleString()}P</strong>
@@ -130,6 +142,13 @@ export function ShopScreen() {
                   >
                     {isPending ? "처리 중..." : item.equipped ? "장착 해제" : "장착하기"}
                   </button>
+                ) : locked ? (
+                  <>
+                    <button type="button" className="btn btn--secondary shop-card__btn" disabled>
+                      🔒 잠김
+                    </button>
+                    <p className="shop-card__locked-hint">{locked}</p>
+                  </>
                 ) : (
                   <button
                     type="button"

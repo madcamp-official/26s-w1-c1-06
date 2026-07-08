@@ -54,7 +54,7 @@ export function HomeScreen() {
             />
           </p>
           <p className="home-card__nickname">
-            {equippedBadge && <ShopBadgeIcon rarity={equippedBadge.rarity} size={20} />}
+            {equippedBadge && <ShopBadgeIcon item={equippedBadge} size={20} />}
             {user.nickname}님
           </p>
           {equippedTitle && <p className="home-card__title">{equippedTitle.label}</p>}
