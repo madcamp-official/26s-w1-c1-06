@@ -115,6 +115,13 @@ export interface UserSearchResult {
   email: string;
 }
 
+export interface FriendRequestView {
+  id: string;
+  requesterId: string;
+  requesterNickname: string;
+  createdAt: string;
+}
+
 export interface ShopCatalogItemView {
   key: string;
   label: string;
