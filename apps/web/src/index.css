@@ -2193,13 +2193,27 @@ select {
   top: 8px;
   left: 56px;
   z-index: 2;
-  background: #1e1e1e;
+  background: rgba(20, 20, 20, 0.92);
+  backdrop-filter: blur(4px);
   border: 1px solid #333;
-  border-radius: 8px;
-  padding: 10px 12px;
+  border-radius: 12px;
+  padding: 10px 14px;
   font-size: 14px;
   color: #eee;
   pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  animation: candle-tooltip-pop 0.12s ease-out;
+}
+
+@keyframes candle-tooltip-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .candle-chart__tooltip-muted {
@@ -3224,4 +3238,99 @@ select {
   margin: 0;
   font-size: 0.78rem;
   color: #777;
+}
+
+/* 첫 방문 튜토리얼 모달 (Framer Motion으로 애니메이션, 여긴 레이아웃만) */
+.tutorial-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.tutorial-modal {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+.tutorial-modal__eyebrow {
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--kakao-gray-500);
+}
+
+.tutorial-modal__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.tutorial-modal__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--kakao-gray-200);
+  transition: background 0.2s;
+}
+
+.tutorial-modal__dot--active {
+  background: var(--kakao-yellow);
+  width: 20px;
+  border-radius: 999px;
+}
+
+.tutorial-modal__stage {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.tutorial-modal__step {
+  width: 100%;
+  text-align: center;
+}
+
+.tutorial-modal__emoji {
+  display: block;
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.tutorial-modal__title {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.tutorial-modal__desc {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--kakao-gray-500);
+  line-height: 1.5;
+}
+
+.tutorial-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.tutorial-modal__skip {
+  flex-shrink: 0;
+  color: var(--kakao-gray-500);
 }

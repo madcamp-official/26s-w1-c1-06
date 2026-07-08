@@ -1,5 +1,8 @@
+import { AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
+import { TutorialModal } from "../components/TutorialModal";
+import { useTutorialGate } from "../hooks/useTutorialGate";
 import { apiFetch } from "../lib/api";
 import { usePolling } from "../hooks/usePolling";
 
@@ -57,6 +60,8 @@ function NavItems({ className }: { className: string }) {
 }
 
 export function TabLayout() {
+  const tutorial = useTutorialGate();
+
   return (
     <div className="tab-layout">
       <aside className="tab-sidebar" aria-label="메인 메뉴">
@@ -78,6 +83,10 @@ export function TabLayout() {
       <nav className="tab-bar" aria-label="메인 탭">
         <NavItems className="tab-bar__item" />
       </nav>
+
+      <AnimatePresence>
+        {tutorial.show && <TutorialModal key="tutorial" onClose={tutorial.dismiss} />}
+      </AnimatePresence>
     </div>
   );
 }
