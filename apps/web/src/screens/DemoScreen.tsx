@@ -12,6 +12,7 @@ import {
   listFriends,
   listPositions,
   listPromises,
+  seedDemoNotifications,
 } from "../lib/endpoints";
 import type { FriendView, PromiseView } from "../types/api";
 
@@ -109,6 +110,21 @@ export function DemoScreen() {
       );
       await refreshPromises();
     });
+  }
+
+  async function handleSeedNotifications() {
+    setBusy(true);
+    try {
+      await seedDemoNotifications();
+      appendLog("알림 4종류 만들기 성공");
+      navigate("/notifications");
+    } catch (err) {
+      const msg =
+        err instanceof ApiError ? err.message : err instanceof Error ? err.message : "실패";
+      appendLog(`알림 4종류 만들기 실패: ${msg}`);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function handleViewResult() {
@@ -245,6 +261,21 @@ export function DemoScreen() {
               결과 보기
             </button>
           </div>
+        </section>
+
+        <section className="control-panel">
+          <h2 className="control-panel__title">알림 시연</h2>
+          <p className="promise-form__hint">
+            정산 확인 2종·친구요청·약속초대까지 알림함 4종류를 한 번에 만들어 보여줍니다.
+          </p>
+          <button
+            type="button"
+            className="btn btn--primary btn--block"
+            disabled={busy}
+            onClick={() => void handleSeedNotifications()}
+          >
+            알림 4종류 만들기
+          </button>
         </section>
 
         <section className="control-panel control-panel--log">
