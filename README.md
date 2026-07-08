@@ -881,14 +881,10 @@ sequenceDiagram
 
 > 접속 가능한 링크, 실행 방법, 주요 구현 내용
 
-- **서비스 URL:**
-- **실행 방법:**
+- **서비스 URL:** https://latestock.gjtjwns06.madcamp-kaist.org/
+- **실행 방법:** 위 URL로 접속하면 바로 사용 가능(개인 VM + Cloudflare Tunnel로 외부에 상시 노출되어 있어 VPN 연결이나 별도 설치 없이 브라우저만 있으면 된다). 회원가입 후 로그인하면 바로 서비스를 이용할 수 있다.
 
-```bash
-# 실행 방법 작성
-```
-
-로컬 개발은 [CONTRIBUTING.md](./CONTRIBUTING.md) 참고.
+배포 인프라 구성은 [`deploy/RUNBOOK.md`](./deploy/RUNBOOK.md), 로컬 개발은 [CONTRIBUTING.md](./CONTRIBUTING.md) 참고.
 
 ---
 
