@@ -569,16 +569,16 @@ select {
   width: 100%;
   max-width: 100%;
   height: auto;
-  max-height: 180px;
+  max-height: 320px;
   object-fit: cover;
   object-position: top;
 }
 
 .auto-reveal-noshow-meme figcaption {
-  padding: 8px 12px;
+  padding: 12px 14px;
   background: #000;
   color: #fff;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   font-weight: 700;
   text-align: center;
 }
