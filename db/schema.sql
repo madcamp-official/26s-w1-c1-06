@@ -152,6 +152,27 @@ CREATE INDEX idx_etf_orders_investor ON etf_orders (investor_id, created_at DESC
 ALTER TABLE positions ADD COLUMN etf_order_id BIGINT REFERENCES etf_orders(id);
 CREATE INDEX idx_pos_etf ON positions (etf_order_id) WHERE etf_order_id IS NOT NULL; -- 바스켓별 leg 조회
 
+-- ---------- option_positions : 옵션 거래(콜/풋) 포지션 (S-04) ----------
+-- strike 없는 이진 행사: 콜=정시, 풋=지각/노쇼. 프리미엄은 구매 시점 EWMA(p_at_purchase)로 고정.
+CREATE TABLE option_positions (
+    id                BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    investor_id       BIGINT NOT NULL REFERENCES users(id),
+    stock_user_id     BIGINT NOT NULL REFERENCES users(id),
+    promise_id        BIGINT NOT NULL REFERENCES promises(id),
+    option_type       option_type NOT NULL,
+    quantity          INT NOT NULL CHECK (quantity > 0),
+    reference_price   INT NOT NULL CHECK (reference_price > 0),  -- 구매 시점 현재가(배당 산정 기준)
+    premium_paid      INT NOT NULL CHECK (premium_paid >= 0),    -- 즉시 지불(환불 없음)
+    p_at_purchase     REAL NOT NULL CHECK (p_at_purchase BETWEEN 0 AND 1), -- L-01 EWMA, 프리미엄 산정 근거 기록
+    payout            INT,                                       -- 배당(실패 시 0, point_transactions 미기록)
+    status            position_status NOT NULL DEFAULT 'open',
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    settled_at        TIMESTAMPTZ,
+    UNIQUE (investor_id, stock_user_id, promise_id, option_type)  -- 동일 약속·종목·유형 중복 매수 차단
+);
+CREATE INDEX idx_option_positions_investor ON option_positions (investor_id);
+CREATE INDEX idx_option_positions_settle ON option_positions (promise_id, stock_user_id, status); -- 정산 배치 조회(settleOptionsForStock)
+
 -- ---------- self_stock_options : F-17 특별매수 권한 ----------
 CREATE TABLE self_stock_options (
     id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
