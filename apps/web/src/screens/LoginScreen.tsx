@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthField, AuthLayout, AuthLink } from "../components/AuthLayout";
+import { ClassmateLoginHelper } from "../components/ClassmateLoginHelper";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../lib/api";
 
@@ -68,6 +69,13 @@ export function LoginScreen() {
           {isSubmitting ? "로그인 중..." : "로그인"}
         </button>
       </form>
+
+      <ClassmateLoginHelper
+        onUseCredentials={(foundEmail, foundPassword) => {
+          setEmail(foundEmail);
+          setPassword(foundPassword);
+        }}
+      />
     </AuthLayout>
   );
 }
