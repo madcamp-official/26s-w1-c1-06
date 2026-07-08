@@ -1,6 +1,7 @@
 import { BASE_STOCK_PRICE } from "@latestock/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { AddFriendModal } from "../components/AddFriendModal";
 import { AnimatedNumber } from "../components/AnimatedNumber";
 import { AsyncState } from "../components/AsyncState";
 import { EtfRecommendationsSection } from "../components/EtfRecommendationsSection";
@@ -24,6 +25,7 @@ export function FriendsMarketScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [availablePoints, setAvailablePoints] = useState<number | null>(null);
   const [isBasketBuilderOpen, setIsBasketBuilderOpen] = useState(false);
+  const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
 
   const selectedId = searchParams.get("stock");
   const selected = friends?.find((f) => f.userId === selectedId) ?? friends?.[0] ?? null;
@@ -85,6 +87,13 @@ export function FriendsMarketScreen() {
           <button
             type="button"
             className="btn btn--secondary"
+            onClick={() => setIsAddFriendOpen(true)}
+          >
+            친구 추가
+          </button>
+          <button
+            type="button"
+            className="btn btn--secondary"
             onClick={() => setIsBasketBuilderOpen(true)}
           >
             펀드 직접 만들기
@@ -103,6 +112,8 @@ export function FriendsMarketScreen() {
         />
       )}
 
+      {isAddFriendOpen && <AddFriendModal onClose={() => setIsAddFriendOpen(false)} />}
+
       <AsyncState
         loading={friends === null && !loadError}
         error={loadError}
@@ -110,6 +121,15 @@ export function FriendsMarketScreen() {
         empty={friends?.length === 0}
         emptyTitle="아직 친구 시장이 비어 있어요"
         emptyMessage="친구를 추가하면 종목 리스트가 여기에 표시됩니다."
+        emptyAction={
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => setIsAddFriendOpen(true)}
+          >
+            친구 추가하기
+          </button>
+        }
       >
         <div className="trade-dashboard__body">
           <div className="trade-dashboard__main">

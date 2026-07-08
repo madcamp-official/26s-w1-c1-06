@@ -15,10 +15,24 @@ import type {
   PromiseView,
   RankingEntryView,
   UnconfirmedSettlements,
+  UserSearchResult,
 } from "../types/api";
 
 export function listFriends() {
   return apiFetch<{ friends: FriendView[] }>("/api/friends");
+}
+
+export function searchUsers(query: string) {
+  return apiFetch<{ users: UserSearchResult[] }>(
+    `/api/users/search?q=${encodeURIComponent(query)}`,
+  );
+}
+
+export function sendFriendRequest(addresseeId: string) {
+  return apiFetch<{ id: string }>("/api/friends/requests", {
+    method: "POST",
+    body: JSON.stringify({ addresseeId }),
+  });
 }
 
 export function getFriendRanking() {

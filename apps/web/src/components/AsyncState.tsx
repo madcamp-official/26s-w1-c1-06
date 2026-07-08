@@ -6,6 +6,7 @@ interface AsyncStateProps {
   empty?: boolean;
   emptyTitle?: string;
   emptyMessage?: string;
+  emptyAction?: ReactNode;
   onRetry?: () => void;
   children: ReactNode;
 }
@@ -16,6 +17,7 @@ export function AsyncState({
   empty,
   emptyTitle = "아직 내용이 없어요",
   emptyMessage = "새로운 활동이 생기면 여기에 표시됩니다.",
+  emptyAction,
   onRetry,
   children,
 }: AsyncStateProps) {
@@ -54,6 +56,7 @@ export function AsyncState({
         </div>
         <p className="state-title">{emptyTitle}</p>
         <p className="state-message">{emptyMessage}</p>
+        {emptyAction}
       </div>
     );
   }
