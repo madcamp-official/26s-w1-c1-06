@@ -65,6 +65,7 @@ export function AutoSettlementReveal({ data, reload }: AutoSettlementRevealProps
   const [queue, setQueue] = useState<QueueItem[] | null>(null);
   const [index, setIndex] = useState(0);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [isConfirmingAll, setIsConfirmingAll] = useState(false);
 
   useEffect(() => {
     if (!data || !user) return;
@@ -109,6 +110,18 @@ export function AutoSettlementReveal({ data, reload }: AutoSettlementRevealProps
     }
   }
 
+  /** 남은 항목을 전부 순차 확인 — confirmSettlement는 실패해도 던지지 않아 안전하게 이어갈 수 있다. */
+  async function handleConfirmAll() {
+    setIsConfirmingAll(true);
+    for (let i = index; i < queue!.length; i++) {
+      const item = queue![i]!;
+      await confirmSettlement(item.confirmKind, item.confirmRefId);
+    }
+    setIsConfirmingAll(false);
+    setQueue(null);
+    reload();
+  }
+
   return (
     <div className="auto-reveal-overlay" role="dialog" aria-modal="true">
       <div
@@ -141,11 +154,22 @@ export function AutoSettlementReveal({ data, reload }: AutoSettlementRevealProps
         <button
           type="button"
           className="btn btn--primary btn--block"
-          disabled={isConfirming}
+          disabled={isConfirming || isConfirmingAll}
           onClick={() => void handleNext()}
         >
           {isConfirming ? "처리 중..." : isLast ? "확인" : `다음 (${index + 1}/${queue.length})`}
         </button>
+
+        {!isLast && (
+          <button
+            type="button"
+            className="btn btn--secondary btn--block"
+            disabled={isConfirming || isConfirmingAll}
+            onClick={() => void handleConfirmAll()}
+          >
+            {isConfirmingAll ? "모두 확인하는 중..." : `모두 확인 (${queue.length - index}건)`}
+          </button>
+        )}
       </div>
     </div>
   );
