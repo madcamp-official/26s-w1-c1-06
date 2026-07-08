@@ -18,7 +18,10 @@ export function SettlementHero({ vm }: SettlementHeroProps) {
   return (
     <section
       className="settlement-hero"
-      style={{ background: MEME_BG_COLORS[vm.memeBgKey] }}
+      style={{
+        background: MEME_BG_COLORS[vm.memeBgKey],
+        color: vm.memeBgKey === "NO_SHOW" ? "#fff" : undefined,
+      }}
     >
       <p className="settlement-hero__eyebrow">정산 결과</p>
       <h1 className="settlement-hero__title">{vm.memeLabel}</h1>
