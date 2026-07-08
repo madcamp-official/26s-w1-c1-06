@@ -86,6 +86,7 @@ export function NotificationsScreen() {
         error={error}
         onRetry={load}
         empty={data?.items.length === 0}
+        emptyIcon="🔔"
         emptyTitle="새 알림이 없어요"
         emptyMessage="정산·친구요청·약속초대가 생기면 여기에 표시됩니다."
       >

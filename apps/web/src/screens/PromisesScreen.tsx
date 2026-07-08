@@ -68,6 +68,7 @@ export function PromisesScreen() {
         error={error}
         onRetry={() => load(tab)}
         empty={promises?.length === 0}
+        emptyIcon="📅"
         emptyTitle="표시할 약속이 없어요"
         emptyMessage="새 약속을 만들어 친구를 초대해 보세요."
       >

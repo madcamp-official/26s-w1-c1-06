@@ -75,7 +75,10 @@ export function AddFriendModal({ onClose }: AddFriendModalProps) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-box modal-box--add-friend" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box modal-box--add-friend modal-box--dark"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-box__header">
           <span className="modal-box__title">친구 추가</span>
           <button type="button" className="modal-box__close" onClick={onClose} aria-label="닫기">

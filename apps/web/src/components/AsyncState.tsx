@@ -4,6 +4,7 @@ interface AsyncStateProps {
   loading?: boolean;
   error?: string | null;
   empty?: boolean;
+  emptyIcon?: string;
   emptyTitle?: string;
   emptyMessage?: string;
   emptyAction?: ReactNode;
@@ -15,6 +16,7 @@ export function AsyncState({
   loading,
   error,
   empty,
+  emptyIcon = "💬",
   emptyTitle = "아직 내용이 없어요",
   emptyMessage = "새로운 활동이 생기면 여기에 표시됩니다.",
   emptyAction,
@@ -52,7 +54,7 @@ export function AsyncState({
     return (
       <div className="state-panel">
         <div className="state-icon" aria-hidden>
-          💬
+          {emptyIcon}
         </div>
         <p className="state-title">{emptyTitle}</p>
         <p className="state-message">{emptyMessage}</p>

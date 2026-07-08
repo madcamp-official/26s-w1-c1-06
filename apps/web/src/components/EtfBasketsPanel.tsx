@@ -32,6 +32,7 @@ export function EtfBasketsPanel({ baskets, isLoading, error, onRetry }: EtfBaske
         error={error}
         onRetry={onRetry}
         empty={baskets.length === 0}
+        emptyIcon="🧺"
         emptyTitle="보유 중인 ETF 바스켓이 없어요"
         emptyMessage="친구·시장에서 추천 ETF를 사거나, 직접 펀드를 만들어 보세요."
       >

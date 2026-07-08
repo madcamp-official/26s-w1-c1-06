@@ -151,11 +151,16 @@ export function StockCandlestickChart({
         style={{
           height,
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          gap: 8,
           color: emptyColor,
         }}
       >
+        <span style={{ fontSize: "1.8rem" }} aria-hidden>
+          📉
+        </span>
         아직 정산된 약속이 없어요
       </div>
     );
