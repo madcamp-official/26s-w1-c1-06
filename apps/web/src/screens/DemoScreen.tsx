@@ -12,7 +12,7 @@ import {
   listFriends,
   listPositions,
   listPromises,
-  seedDemoNotifications,
+  seedDemoSettlementMemes,
 } from "../lib/endpoints";
 import type { FriendView, PromiseView } from "../types/api";
 
@@ -112,16 +112,16 @@ export function DemoScreen() {
     });
   }
 
-  async function handleSeedNotifications() {
+  async function handleSeedSettlementMemes() {
     setBusy(true);
     try {
-      await seedDemoNotifications();
-      appendLog("알림 4종류 만들기 성공");
-      navigate("/notifications");
+      await seedDemoSettlementMemes();
+      appendLog("정산 결과 밈 5종류 만들기 성공");
+      navigate("/home");
     } catch (err) {
       const msg =
         err instanceof ApiError ? err.message : err instanceof Error ? err.message : "실패";
-      appendLog(`알림 4종류 만들기 실패: ${msg}`);
+      appendLog(`정산 결과 밈 5종류 만들기 실패: ${msg}`);
     } finally {
       setBusy(false);
     }
@@ -264,17 +264,18 @@ export function DemoScreen() {
         </section>
 
         <section className="control-panel">
-          <h2 className="control-panel__title">알림 시연</h2>
+          <h2 className="control-panel__title">정산 결과 시연</h2>
           <p className="promise-form__hint">
-            정산 확인 2종·친구요청·약속초대까지 알림함 4종류를 한 번에 만들어 보여줍니다.
+            상한가·숨고르기·폭락장·서킷브레이커·상장폐지까지 정산 결과 밈 5종류를 홈 화면
+            팝업으로 한 번에 보여줍니다.
           </p>
           <button
             type="button"
             className="btn btn--primary btn--block"
             disabled={busy}
-            onClick={() => void handleSeedNotifications()}
+            onClick={() => void handleSeedSettlementMemes()}
           >
-            알림 4종류 만들기
+            정산 결과 5종류 만들기
           </button>
         </section>
 
