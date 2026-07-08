@@ -12,11 +12,12 @@ export const TX_TYPE_META: Record<TxType, { label: string }> = {
   self_stock_sell: { label: "자기주식 매도" },
   option_premium: { label: "옵션 프리미엄" },
   option_payout: { label: "옵션 행사 배당" },
+  shop_purchase: { label: "상점 구매" },
 };
 
 /**
  * "전체/잠금/정산" 필터 그룹 — F-14 자산 화면 탭.
- * signup_grant, self_stock_buy/sell, option_premium/option_payout은
+ * signup_grant, self_stock_buy/sell, option_premium/option_payout, shop_purchase는
  * 잠금·정산 어느 쪽도 아니라 전체에서만 보임.
  */
 const LOCK_TYPES: ReadonlySet<TxType> = new Set(["position_lock", "position_unlock"]);
