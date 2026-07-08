@@ -36,6 +36,14 @@ export const LATE_DROP_RATE_PER_MIN = 0.01;
  */
 export const FLOOR_PRICE = 1_000;
 
+/**
+ * 상한가 (원). 정시 상승은 이 값에서 클램프된다.
+ * 명세에는 하한가만 있고 상한가가 없었음 — 정시 복리 상승(3%/회)이 누적되면
+ * current_price(DB INTEGER, 최대 약 21억) 범위를 넘어 오버플로우가 나는 걸 방어.
+ * 채택값: 기본가의 20배.
+ */
+export const CEILING_PRICE = BASE_STOCK_PRICE * 20;
+
 /** GPS 도착 인증 허용 반경 (m) — F-05. */
 export const CHECKIN_RADIUS_METERS = 50;
 

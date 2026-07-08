@@ -1,4 +1,5 @@
 import {
+  CEILING_PRICE,
   EWMA_ALPHA,
   FLOOR_PRICE,
   LATE_DROP_RATE_PER_MIN,
@@ -7,7 +8,7 @@ import {
 } from "./constants.js";
 import type { Verdict } from "./types.js";
 
-/** F-07: 정시 상승 / 지각·노쇼 하락(단리), 하한가 클램프. INT 원 단위 정수 연산. */
+/** F-07: 정시 상승 / 지각·노쇼 하락(단리), 하한가·상한가 클램프. INT 원 단위 정수 연산. */
 export function computeNewPrice(
   currentPrice: number,
   verdict: Verdict,
@@ -25,7 +26,7 @@ export function computeNewPrice(
       currentPrice -
       Math.floor(currentPrice * lateMinutes * LATE_DROP_RATE_PER_MIN);
   }
-  return Math.max(FLOOR_PRICE, raw);
+  return Math.min(CEILING_PRICE, Math.max(FLOOR_PRICE, raw));
 }
 
 /** L-01 EWMA: 지각/노쇼=1, 정시=0. */
