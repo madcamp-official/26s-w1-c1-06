@@ -166,7 +166,7 @@ export function AssetsScreen() {
 
               <div className="trade-chart__canvas">
                 <AsyncState loading={chart.isLoading} error={chart.error}>
-                  <StockCandlestickChart data={chart.data} theme="dark" height={400} />
+                  <StockCandlestickChart data={chart.data} height={400} />
                 </AsyncState>
               </div>
 

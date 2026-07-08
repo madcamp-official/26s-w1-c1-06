@@ -11,8 +11,8 @@
   --meme-bg-LATE_11_30: #7a2d00;
   --meme-bg-LATE_31_PLUS: #8c0000;
   --meme-bg-NO_SHOW: #1a1a1a;
-  --stock-rise: #d60000;
-  --stock-fall: #0051c7;
+  --stock-rise: #f04452;
+  --stock-fall: #3182f6;
   font-family:
     "Pretendard",
     -apple-system,
@@ -2134,30 +2134,21 @@ select {
   background: var(--stock-fall);
 }
 
-.candle-chart__last-settled {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 1;
-  font-size: 13px;
-  color: #777;
-}
-
 .candle-chart__tooltip {
   position: absolute;
-  top: 8px;
-  left: 56px;
   z-index: 2;
-  background: rgba(20, 20, 20, 0.92);
+  background: rgba(24, 24, 27, 0.95);
   backdrop-filter: blur(4px);
   border: 1px solid #333;
   border-radius: 12px;
   padding: 10px 14px;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.5;
   color: #eee;
   pointer-events: none;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   animation: candle-tooltip-pop 0.12s ease-out;
+  white-space: nowrap;
 }
 
 @keyframes candle-tooltip-pop {
