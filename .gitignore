@@ -37,3 +37,8 @@ Thumbs.db
 
 # vite
 .vite/
+
+# Claude Code local-only planning docs / settings (never push)
+.claude/
+claude/
+CLAUDE_1.md
