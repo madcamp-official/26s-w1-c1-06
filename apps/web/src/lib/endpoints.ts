@@ -240,7 +240,7 @@ export function equipShopItem(itemType: ShopItemType, itemKey: string | null) {
   });
 }
 
-/** F-16 데모: 알림함 4종류(정산 확인 2종·친구요청·약속초대)를 내 앞으로 한 번에 만든다. */
-export function seedDemoNotifications() {
-  return apiFetch<{ ok: true }>("/api/demo/seed-notifications", { method: "POST" });
+/** F-16/F-20 데모: 정산 결과 밈 등급 5종(상한가/숨고르기/폭락장/서킷브레이커/상장폐지)을 내 앞으로 한 번에 만든다. */
+export function seedDemoSettlementMemes() {
+  return apiFetch<{ ok: true }>("/api/demo/seed-settlement-memes", { method: "POST" });
 }

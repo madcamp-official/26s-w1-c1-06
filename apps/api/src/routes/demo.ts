@@ -2,7 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../auth/middleware.js";
 import { env } from "../env.js";
 import { runSettlementNow } from "../settlement/scheduler.js";
-import { seedAllNotificationTypes } from "../services/demo-notifications.js";
+import { seedAllVerdictResults } from "../services/demo-settlement-memes.js";
 
 export const demoRouter = Router();
 
@@ -43,17 +43,20 @@ demoRouter.post("/settle", async (req, res) => {
 });
 
 /**
- * F-16 데모: 알림함(S-07)의 4종류(정산 확인 2종·친구요청·약속초대)를 로그인한 유저 앞으로
- * 한 번에 만들어 알림 UI를 시연할 수 있게 한다. 비프로덕션 또는 DEMO_MODE=true 에서만 허용.
+ * F-16/F-20 데모: 정산 결과 팝업(AutoSettlementReveal)이 등급별로 어떻게 보이는지
+ * 한 번에 보여주기 위해, 밈 등급 5종(상한가/숨고르기/폭락장/서킷브레이커/상장폐지)에
+ * 해당하는 미확인 정산을 로그인한 유저 앞으로 만들어준다. 홈 화면에 뜨는
+ * AutoSettlementReveal이 이 5건을 큐로 잡아 순서대로 보여준다.
+ * 비프로덕션 또는 DEMO_MODE=true 에서만 허용.
  */
-demoRouter.post("/seed-notifications", requireAuth, async (req, res) => {
+demoRouter.post("/seed-settlement-memes", requireAuth, async (req, res) => {
   if (env.isProd && process.env.DEMO_MODE !== "true") {
     res.status(403).json({ error: "데모 기능은 비프로덕션 환경에서만 사용 가능합니다." });
     return;
   }
 
   try {
-    await seedAllNotificationTypes(req.user!.id);
+    await seedAllVerdictResults(req.user!.id);
     res.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
