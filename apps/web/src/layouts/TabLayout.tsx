@@ -11,6 +11,7 @@ const TABS = [
   { to: "/friends", label: "친구·시장", icon: "👥" },
   { to: "/promises", label: "약속", icon: "📅" },
   { to: "/assets", label: "자산", icon: "💰" },
+  { to: "/shop", label: "상점", icon: "🎁" },
   { to: "/history", label: "내역", icon: "🧾" },
   { to: "/notifications", label: "알림", icon: "🔔" },
   { to: "/demo", label: "데모", icon: "🧪" },

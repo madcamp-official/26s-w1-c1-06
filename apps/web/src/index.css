@@ -63,18 +63,6 @@ select {
   font-size: 1.05rem;
 }
 
-.screen-header__back {
-  display: inline-block;
-  margin-bottom: 8px;
-  color: var(--kakao-gray-500);
-  font-size: 0.9rem;
-  text-decoration: none;
-}
-
-.screen-header__back:hover {
-  text-decoration: underline;
-}
-
 /* Tab bar — KakaoTalk (mobile) + sidebar (web) */
 .tab-layout {
   display: flex;
