@@ -2,6 +2,7 @@ import {
   CandlestickSeries,
   ColorType,
   HistogramSeries,
+  LineSeries,
   createChart,
   type IChartApi,
   type ISeriesApi,
@@ -9,7 +10,7 @@ import {
   type Time,
 } from "lightweight-charts";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { aggregateDailyCandles, type DailyCandle } from "../lib/aggregateDailyCandles";
+import { aggregateDailyCandles, computeSMA, type DailyCandle } from "../lib/aggregateDailyCandles";
 import type { ChartPoint } from "../hooks/useStockChart";
 import { FALL_COLOR, RISE_COLOR } from "../theme";
 
@@ -26,6 +27,10 @@ interface TooltipState {
 const GRID_COLOR = "rgba(255, 255, 255, 0.06)";
 const AXIS_TEXT_COLOR = "#8B95A1";
 const BACKGROUND_COLOR = "#18181b";
+const SMA_SHORT_PERIOD = 5;
+const SMA_LONG_PERIOD = 20;
+const SMA_SHORT_COLOR = "#FFD60A";
+const SMA_LONG_COLOR = "#9B8CFF";
 
 /** lightweight-charts가 business-day 문자열을 BusinessDay 객체로 넘겨줄 수도 있어 두 형태 모두 받는다. */
 function timeKey(time: Time): string {
@@ -54,6 +59,8 @@ export function StockCandlestickChart({ data, height = 400 }: StockCandlestickCh
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
+  const smaShortSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const smaLongSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
   const candlesRef = useRef<Map<string, DailyCandle>>(new Map());
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
@@ -108,6 +115,29 @@ export function StockCandlestickChart({ data, height = 400 }: StockCandlestickCh
     );
     volumeSeriesRef.current = volumeSeries;
 
+    smaShortSeriesRef.current = chart.addSeries(
+      LineSeries,
+      {
+        color: SMA_SHORT_COLOR,
+        lineWidth: 1,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        crosshairMarkerVisible: false,
+      },
+      0,
+    );
+    smaLongSeriesRef.current = chart.addSeries(
+      LineSeries,
+      {
+        color: SMA_LONG_COLOR,
+        lineWidth: 1,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        crosshairMarkerVisible: false,
+      },
+      0,
+    );
+
     const panes = chart.panes();
     panes[0]?.setStretchFactor(3);
     panes[1]?.setStretchFactor(1);
@@ -133,6 +163,8 @@ export function StockCandlestickChart({ data, height = 400 }: StockCandlestickCh
       chartRef.current = null;
       candleSeriesRef.current = null;
       volumeSeriesRef.current = null;
+      smaShortSeriesRef.current = null;
+      smaLongSeriesRef.current = null;
     };
   }, []);
 
@@ -148,6 +180,8 @@ export function StockCandlestickChart({ data, height = 400 }: StockCandlestickCh
         color: c.close >= c.open ? RISE_COLOR : FALL_COLOR,
       })),
     );
+    smaShortSeriesRef.current?.setData(computeSMA(candles, SMA_SHORT_PERIOD));
+    smaLongSeriesRef.current?.setData(computeSMA(candles, SMA_LONG_PERIOD));
     chartRef.current?.timeScale().fitContent();
   }, [candles]);
 
@@ -157,6 +191,13 @@ export function StockCandlestickChart({ data, height = 400 }: StockCandlestickCh
         ref={containerRef}
         style={{ width: "100%", height: "100%", visibility: isEmpty ? "hidden" : "visible" }}
       />
+
+      {!isEmpty && (
+        <div className="candle-chart__ma-legend">
+          <span style={{ color: SMA_SHORT_COLOR }}>● {SMA_SHORT_PERIOD}일선</span>
+          <span style={{ color: SMA_LONG_COLOR }}>● {SMA_LONG_PERIOD}일선</span>
+        </div>
+      )}
 
       {isEmpty && (
         <div

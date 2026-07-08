@@ -2134,6 +2134,18 @@ select {
   background: var(--stock-fall);
 }
 
+.candle-chart__ma-legend {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  z-index: 2;
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
 .candle-chart__tooltip {
   position: absolute;
   z-index: 2;
