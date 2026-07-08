@@ -2,10 +2,10 @@ import { MEME_LABELS } from "@latestock/shared";
 
 /**
  * 등락 색상 — 한국 주식 관례(상승 빨강/하락 파랑, 미국식과 반대).
- * [팀 합의 전 임시값] 팀원과 합의되면 이 값만 교체.
+ * 토스증권류 파스텔 톤으로 통일(다크 모드 캔들차트 기준값).
  */
-export const RISE_COLOR = "#d60000";
-export const FALL_COLOR = "#0051c7";
+export const RISE_COLOR = "#F04452";
+export const FALL_COLOR = "#3182F6";
 export const NEUTRAL_COLOR = "#888888";
 
 /**
