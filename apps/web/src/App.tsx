@@ -38,6 +38,7 @@ export function App() {
           <Route path="friends" element={<FriendsMarketScreen />} />
           <Route path="promises" element={<PromisesScreen />} />
           <Route path="assets" element={<AssetsScreen />} />
+          <Route path="shop" element={<ShopScreen />} />
           <Route path="history" element={<HistoryScreen />} />
           <Route path="notifications" element={<NotificationsScreen />} />
           <Route path="demo" element={<DemoScreen />} />
@@ -45,7 +46,6 @@ export function App() {
         <Route path="friends/:userId" element={<FriendDetailScreen />} />
         <Route path="promises/new" element={<PromiseCreateScreen />} />
         <Route path="promises/:id" element={<PromiseDetailScreen />} />
-        <Route path="shop" element={<ShopScreen />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { AsyncState } from "../components/AsyncState";
 import { ShopBadgeIcon } from "../components/ShopBadgeIcon";
 import { useAuth } from "../context/AuthContext";
@@ -75,9 +74,6 @@ export function ShopScreen() {
   return (
     <div className="screen">
       <header className="screen-header">
-        <Link to="/home" className="screen-header__back">
-          ← 홈으로
-        </Link>
         <h1>상점</h1>
         <p className="screen-header__sub">포인트로 칭호·배지를 사서 프로필을 꾸며보세요.</p>
         {user && (
