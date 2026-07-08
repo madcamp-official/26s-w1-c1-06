@@ -61,6 +61,7 @@ export function OpenPositionsPanel({
         error={error}
         onRetry={onRetry}
         empty={positions.length === 0}
+        emptyIcon="📊"
         emptyTitle="보유 중인 포지션이 없어요"
         emptyMessage="친구·시장에서 종목을 골라 매수·공매도해 보세요."
       >

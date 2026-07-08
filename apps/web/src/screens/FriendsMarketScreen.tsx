@@ -89,14 +89,14 @@ export function FriendsMarketScreen() {
             className="btn btn--secondary"
             onClick={() => setIsAddFriendOpen(true)}
           >
-            친구 추가
+            ➕ 친구 추가
           </button>
           <button
             type="button"
             className="btn btn--secondary"
             onClick={() => setIsBasketBuilderOpen(true)}
           >
-            펀드 직접 만들기
+            🧺 펀드 직접 만들기
           </button>
         </div>
       </header>
@@ -119,6 +119,7 @@ export function FriendsMarketScreen() {
         error={loadError}
         onRetry={loadMarket}
         empty={friends?.length === 0}
+        emptyIcon="👥"
         emptyTitle="아직 친구 시장이 비어 있어요"
         emptyMessage="친구를 추가하면 종목 리스트가 여기에 표시됩니다."
         emptyAction={

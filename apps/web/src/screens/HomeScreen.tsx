@@ -3,12 +3,12 @@ import { AnimatedNumber } from "../components/AnimatedNumber";
 import { AutoSettlementReveal } from "../components/AutoSettlementReveal";
 import { FriendActivityFeed } from "../components/FriendActivityFeed";
 import { MarketSummaryCard } from "../components/MarketSummaryCard";
-import { OnboardingFlow } from "../components/OnboardingFlow";
 import { RankingCard } from "../components/RankingCard";
 import { UnconfirmedSettlementsBanner } from "../components/UnconfirmedSettlementsBanner";
 import { useAuth } from "../context/AuthContext";
 import { useAssets } from "../hooks/useAssets";
 import { usePolling } from "../hooks/usePolling";
+import { reopenTutorial } from "../hooks/useTutorialGate";
 import { useUnconfirmedSettlements } from "../hooks/useUnconfirmedSettlements";
 
 export function HomeScreen() {
@@ -36,7 +36,9 @@ export function HomeScreen() {
 
       <UnconfirmedSettlementsBanner data={unconfirmed.data} />
 
-      <OnboardingFlow />
+      <button type="button" className="onboarding-recap" onClick={reopenTutorial}>
+        ❓ 이용 방법 다시보기
+      </button>
 
       {user && (
         <div className="home-card">

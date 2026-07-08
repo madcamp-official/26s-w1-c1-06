@@ -32,6 +32,7 @@ export function OptionPositionsPanel({
         error={error}
         onRetry={onRetry}
         empty={options.length === 0}
+        emptyIcon="🎯"
         emptyTitle="보유 중인 옵션이 없어요"
         emptyMessage="친구·시장에서 콜/풋 옵션을 매수해 보세요."
       >

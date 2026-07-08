@@ -100,7 +100,10 @@ export function EtfBasketBuilder({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-box modal-box--etf-builder" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box modal-box--etf-builder modal-box--dark"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-box__header">
           <span className="modal-box__title">펀드 직접 만들기</span>
           <button type="button" className="modal-box__close" onClick={onClose} aria-label="닫기">
