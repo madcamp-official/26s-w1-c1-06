@@ -1,16 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
+import type { TxType } from "@latestock/shared";
 import { apiFetch } from "../lib/api";
 
-export type TxType =
-  | "signup_grant"
-  | "position_lock"
-  | "position_unlock"
-  | "position_payout"
-  | "defense_reward"
-  | "self_stock_buy"
-  | "self_stock_sell"
-  | "option_premium"
-  | "option_payout";
+export type { TxType };
 
 export interface AssetSummary {
   availablePoints: number;

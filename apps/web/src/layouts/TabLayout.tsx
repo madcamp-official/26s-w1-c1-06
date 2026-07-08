@@ -1,6 +1,7 @@
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 import { TutorialModal } from "../components/TutorialModal";
 import { useTutorialGate } from "../hooks/useTutorialGate";
 import { apiFetch } from "../lib/api";
@@ -62,6 +63,7 @@ function NavItems({ className }: { className: string }) {
 
 export function TabLayout() {
   const tutorial = useTutorialGate();
+  const location = useLocation();
 
   return (
     <div className="tab-layout">
@@ -78,7 +80,9 @@ export function TabLayout() {
       </aside>
 
       <main className="tab-layout__main">
-        <Outlet />
+        <ErrorBoundary key={location.pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
 
       <nav className="tab-bar" aria-label="메인 탭">
