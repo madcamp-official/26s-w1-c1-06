@@ -47,7 +47,7 @@ export function FriendsMarketScreen() {
     loadMarket();
   }, [loadMarket]);
 
-  usePolling(loadMarket, 25000);
+  usePolling(loadMarket, 3000);
 
   useEffect(() => {
     if (!friends || friends.length === 0) return;
